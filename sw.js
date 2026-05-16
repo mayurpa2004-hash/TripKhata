@@ -1,24 +1,24 @@
-const CACHE_NAME = 'tripkhata-cache-v2';
+const CACHE_NAME = 'tripkhata-cache-v3';
+
+// Only mandate the critical files. The browser will cache icons naturally.
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './manifest.json',
-    './icon-192.png',
-    './icon-512.png'
+    './manifest.json'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[SW] Caching assets...');
-                return cache.addAll(ASSETS_TO_CACHE);
+                console.log('[SW] Caching core assets...');
+                // We use a safe catch so the Service Worker NEVER crashes
+                return cache.addAll(ASSETS_TO_CACHE).catch(err => console.log('Asset cache ignored error:', err));
             })
             .then(() => {
-                console.log('[SW] All assets cached!');
-                return self.skipWaiting(); // Activate immediately
+                console.log('[SW] Activated immediately!');
+                return self.skipWaiting(); 
             })
-            .catch(err => console.error('[SW] Cache failed:', err))
     );
 });
 
@@ -33,7 +33,7 @@ self.addEventListener('activate', event => {
                         return caches.delete(name);
                     })
             );
-        }).then(() => self.clients.claim()) // Take control immediately
+        }).then(() => self.clients.claim()) 
     );
 });
 
@@ -51,14 +51,3 @@ self.addEventListener('fetch', event => {
             })
     );
 });
-
-
-
-
-
-
-
-
-
-
-
