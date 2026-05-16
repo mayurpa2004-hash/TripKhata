@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TripKhata - Master Ledger</title>
     
-    <!-- PWA Configuration & Coconut Tree Logo 🌴 -->
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,9 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
     
-    <!-- Fixed Manifest Connection -->
     <link rel="manifest" href="manifest.json">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -99,6 +96,7 @@
         .btn:active { opacity: 0.8; }
         .btn-primary { background: var(--gradient-primary); color: white; }
         .btn-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); }
         .btn-small { padding: 8px 16px; border-radius: 10px; font-size: 0.875rem; width: auto; }
 
@@ -137,7 +135,9 @@
         .expense-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--glass-bg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--glass-border); }
         
-        .delete-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px;}
+        .action-btn { background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
+        .action-btn:active { background: rgba(255,255,255,0.1); }
+        .action-btn.delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: transparent; }
 
         .settlement-card { display: flex; flex-direction: column; padding: 16px; margin-bottom: 12px; gap: 12px; }
         .text-green { color: var(--success); } .text-red { color: var(--danger); }
@@ -161,7 +161,6 @@
 
 <div id="app-container">
 
-    <!-- VIEW: Welcome / Create Trip -->
     <div id="view-welcome" class="view active p-6">
         <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
             <div style="font-size: 4rem; margin-bottom: 10px;">🌴</div>
@@ -182,7 +181,6 @@
             <button class="btn btn-primary mt-4" onclick="app.createTrip()">Create Trip</button>
         </div>
 
-        <!-- PWA Install Banner -->
         <div id="install-banner" class="glass install-banner p-4 mt-6 text-center" style="display: none;">
             <div style="font-size: 2rem; margin-bottom: 8px;">📲</div>
             <h3 class="text-white font-bold mb-1">Install TripKhata App</h3>
@@ -190,14 +188,12 @@
             <button class="btn btn-success" style="background: var(--success); color: white;" onclick="app.installApp()">⬇️ Install Now</button>
         </div>
 
-        <!-- Recent Trips Section -->
         <div id="recent-trips-container" class="mt-8" style="display: none;">
             <h3 class="mb-4 text-center font-semibold text-muted text-xs uppercase tracking-wider">Recent Trips Archive</h3>
             <div id="recent-trips-list"></div>
         </div>
     </div>
 
-    <!-- VIEW: Dashboard -->
     <div id="view-dashboard" class="view p-6">
         <header class="flex justify-between align-center mb-6 mt-4">
             <div>
@@ -207,7 +203,6 @@
             <div class="avatar" style="width: 40px; height: 40px; cursor: pointer;" onclick="app.switchView('members')">👥</div>
         </header>
 
-        <!-- Budget Card -->
         <div class="glass p-6 mb-6">
             <div class="text-center">
                 <p class="text-sm text-muted">Total Group Spent</p>
@@ -219,13 +214,11 @@
             <p class="text-xs text-muted mt-2 text-center" id="dash-health-text">Start adding expenses!</p>
         </div>
 
-        <!-- Leaderboard -->
         <div class="glass p-4 mb-6">
             <h3 class="font-semibold mb-3 text-sm flex align-center gap-2">🏆 Leaderboard (Who Paid Most)</h3>
             <div id="dash-leaderboard" class="flex flex-col gap-2"></div>
         </div>
 
-        <!-- Quick Add -->
         <h3 class="font-semibold mb-4">Quick Add Expense</h3>
         <div class="quick-add-scroll mb-6">
             <div class="quick-chip" onclick="app.openExpenseModal('Train', '🚆')">🚆 Train</div>
@@ -239,13 +232,15 @@
             <div class="quick-chip" onclick="app.openExpenseModal('Prasad', '🍬')">🍬 Prasad</div>
         </div>
 
-        <div class="flex gap-4">
-            <button class="btn btn-outline" style="flex: 1;" onclick="app.generatePDF()">📄 Report</button>
-            <button class="btn btn-outline" style="flex: 1; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" onclick="app.finishTrip(this)">🏁 Finish Trip</button>
+        <div class="flex flex-col gap-4">
+            <div class="flex gap-4">
+                <button class="btn btn-outline" style="flex: 1;" onclick="app.generatePDF()">📄 Report</button>
+                <button class="btn btn-outline" style="flex: 1; color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="app.finishTrip(this)">🏁 Finish Trip</button>
+            </div>
+            <button class="btn btn-danger" onclick="app.resetTrip(this)">⚠️ Reset / Delete Current Trip</button>
         </div>
     </div>
 
-    <!-- VIEW: Expenses Timeline -->
     <div id="view-expenses" class="view p-6">
         <h2 class="mb-6 mt-4">Expense Timeline</h2>
         <div id="expense-list"></div>
@@ -255,7 +250,6 @@
         </div>
     </div>
 
-    <!-- VIEW: Settlements -->
     <div id="view-settlements" class="view p-6">
         <h2 class="mb-6 mt-4">Settle Up 🤝</h2>
         <div class="glass p-4 mb-6">
@@ -264,7 +258,6 @@
         <div id="settlement-list"></div>
     </div>
 
-    <!-- VIEW: Members -->
     <div id="view-members" class="view p-6">
         <div class="flex justify-between align-center mb-6 mt-4">
             <h2>Trip Members</h2>
@@ -272,11 +265,10 @@
         </div>
         <div id="members-list"></div>
         <div class="glass p-4 mt-6 text-center">
-            <p class="text-sm text-muted mb-3">As the accountant, you add all members here and input their expenses.</p>
+            <p class="text-sm text-muted mb-3">Add, edit, or remove friends from the trip here.</p>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav" id="main-nav" style="display: none;">
         <a class="nav-item active" onclick="app.switchView('dashboard')">
             <span class="nav-icon">🏠</span><span>Home</span>
@@ -292,13 +284,10 @@
         </a>
     </nav>
 
-    <!-- FAB -->
     <button class="fab" id="fab-add" style="display: none;" onclick="app.openExpenseModal()">+</button>
 
-    <!-- MODALS & BOTTOM SHEETS -->
     <div class="modal-overlay" id="modal-overlay" onclick="app.closeModals()"></div>
 
-    <!-- Add Expense Bottom Sheet -->
     <div class="bottom-sheet" id="sheet-expense">
         <div class="sheet-handle"></div>
         <h2 class="mb-4 text-center" id="expense-modal-title">Add Expense</h2>
@@ -349,10 +338,10 @@
         <button class="btn btn-primary mt-6" onclick="app.saveExpense()">Save Expense</button>
     </div>
 
-    <!-- Add Member Bottom Sheet -->
     <div class="bottom-sheet" id="sheet-member">
         <div class="sheet-handle"></div>
-        <h2 class="mb-4 text-center">Add Member</h2>
+        <h2 class="mb-4 text-center" id="member-modal-title">Add Member</h2>
+        <input type="hidden" id="edit-mem-id" value="">
         <div class="form-group">
             <label>Name</label>
             <input type="text" id="mem-name" class="input" placeholder="Enter friend's name">
@@ -362,16 +351,14 @@
             <div class="quick-add-scroll" id="emoji-picker" style="font-size: 1.5rem;"></div>
             <input type="hidden" id="mem-emoji" value="😎">
         </div>
-        <button class="btn btn-primary mt-6" onclick="app.saveMember()">Add to Trip</button>
+        <button class="btn btn-primary mt-6" id="save-mem-btn" onclick="app.saveMember()">Add to Trip</button>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast">Message here</div>
 
 </div>
 
 <script>
-    // CRITICAL: SERVICE WORKER REGISTRATION FOR TRUE PWA INSTALL
     if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -470,7 +457,7 @@
                 budget: parseFloat(budget)
             };
 
-            this.state.members = [{ id: 'm1', name: 'Mayur', emoji: '😎' }];
+            this.state.members = [{ id: 'm1', name: 'Me', emoji: '😎' }];
             this.state.expenses = [];
             this.state.payments = [];
 
@@ -486,8 +473,8 @@
             if (btn.dataset.confirm !== "true") {
                 btn.dataset.confirm = "true";
                 const originalText = btn.innerText;
-                btn.innerText = "⚠️ Tap again to confirm";
-                btn.style.background = "rgba(239, 68, 68, 0.2)";
+                btn.innerText = "⚠️ Tap again to Archive";
+                btn.style.background = "rgba(16, 185, 129, 0.2)";
                 
                 setTimeout(() => {
                     btn.dataset.confirm = "false";
@@ -519,6 +506,35 @@
             this.renderRecentTrips();
         },
 
+        // NEW: Reset / Delete Trip Feature
+        resetTrip(btn) {
+            if (btn.dataset.confirm !== "true") {
+                btn.dataset.confirm = "true";
+                const originalText = btn.innerText;
+                btn.innerText = "⚠️ Tap again to completely DELETE";
+                
+                setTimeout(() => {
+                    btn.dataset.confirm = "false";
+                    btn.innerText = originalText;
+                }, 3000);
+                return;
+            }
+
+            this.state.trip = null;
+            this.state.members = [];
+            this.state.expenses = [];
+            this.state.payments = [];
+
+            this.saveData();
+            this.showToast("Trip data wiped clean! 🗑️");
+            
+            document.getElementById('main-nav').style.display = 'none';
+            document.getElementById('fab-add').style.display = 'none';
+            
+            this.switchView('welcome');
+            this.renderRecentTrips();
+        },
+
         openModal(id) {
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById(id).classList.add('active');
@@ -528,8 +544,26 @@
             document.querySelectorAll('.bottom-sheet').forEach(el => el.classList.remove('active'));
         },
 
-        openMemberModal() {
-            document.getElementById('mem-name').value = '';
+        // UPDATED: Open Add/Edit Member Modal
+        openMemberModal(editId = null) {
+            if (editId) {
+                const member = this.state.members.find(m => m.id === editId);
+                if (!member) return;
+                document.getElementById('member-modal-title').innerText = "Edit Member";
+                document.getElementById('mem-name').value = member.name;
+                document.getElementById('edit-mem-id').value = member.id;
+                document.getElementById('save-mem-btn').innerText = "Update Member";
+                
+                // Select their current emoji
+                const chip = Array.from(document.querySelectorAll('#emoji-picker .quick-chip')).find(el => el.innerText === member.emoji);
+                if(chip) this.selectEmoji(member.emoji, chip);
+
+            } else {
+                document.getElementById('member-modal-title').innerText = "Add Member";
+                document.getElementById('mem-name').value = '';
+                document.getElementById('edit-mem-id').value = '';
+                document.getElementById('save-mem-btn').innerText = "Add to Trip";
+            }
             this.openModal('sheet-member');
         },
 
@@ -545,14 +579,45 @@
             document.querySelectorAll('#emoji-picker .quick-chip').forEach(c => c.style.borderColor = 'var(--glass-border)');
             el.style.borderColor = 'var(--primary)';
         },
+
+        // UPDATED: Save or Update Member
         saveMember() {
             const name = document.getElementById('mem-name').value.trim();
             const emoji = document.getElementById('mem-emoji').value;
+            const editId = document.getElementById('edit-mem-id').value;
+
             if (!name) return this.showToast('Enter a name');
-            this.state.members.push({ id: 'm_' + Date.now(), name, emoji });
+
+            if (editId) {
+                const mem = this.state.members.find(m => m.id === editId);
+                if (mem) {
+                    mem.name = name;
+                    mem.emoji = emoji;
+                }
+                this.showToast('Member updated! ✅');
+            } else {
+                this.state.members.push({ id: 'm_' + Date.now(), name, emoji });
+                this.showToast(`${name} added! ✅`);
+            }
+
             this.saveData();
             this.closeModals();
-            this.showToast(`${name} added!`);
+        },
+
+        // NEW: Delete Member with Safety Check
+        deleteMember(id) {
+            // Safety check: Don't delete if they are part of expenses
+            const hasExpenses = this.state.expenses.some(e => 
+                e.paidBy === id || (e.splitAmong && e.splitAmong.includes(id))
+            );
+
+            if (hasExpenses) {
+                return this.showToast('Cannot delete! This person is part of active expenses.');
+            }
+
+            this.state.members = this.state.members.filter(m => m.id !== id);
+            this.saveData();
+            this.showToast('Member removed 🗑️');
         },
 
         openExpenseModal(title = '', icon = '💸') {
@@ -760,7 +825,7 @@
                             <h4 class="font-semibold text-sm">${e.title} ${typeTag}</h4>
                             <p class="text-xs text-muted mt-1">Paid by ${payer.name} • ${date}</p>
                             <p class="text-xs mt-1" style="color: #cbd5e1;">${splitText}</p>
-                            <button class="delete-btn" onclick="app.deleteExpense('${e.id}')">Delete</button>
+                            <button class="action-btn delete mt-2" onclick="app.deleteExpense('${e.id}')">🗑️ Delete</button>
                         </div>
                     </div>
                     <div class="font-bold text-primary">₹${Math.round(e.amount).toLocaleString('en-IN')}</div>
@@ -769,6 +834,7 @@
             }).join('');
         },
 
+        // UPDATED: Render Members list with Edit and Delete options
         renderMembers() {
             const list = document.getElementById('members-list');
             const spendMap = {};
@@ -783,8 +849,12 @@
                         <div class="avatar">${m.emoji}</div>
                         <div>
                             <h4 class="font-semibold text-sm">${m.name}</h4>
-                            <p class="text-xs text-muted">Total Paid: ₹${Math.round(spendMap[m.id] || 0).toLocaleString('en-IN')}</p>
+                            <p class="text-xs text-muted mt-1">Total Paid: ₹${Math.round(spendMap[m.id] || 0).toLocaleString('en-IN')}</p>
                         </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="action-btn" onclick="app.openMemberModal('${m.id}')">✏️</button>
+                        <button class="action-btn delete" onclick="app.deleteMember('${m.id}')">🗑️</button>
                     </div>
                 </div>
             `).join('');
