@@ -27,6 +27,7 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --wallet-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --card-radius: 20px;
@@ -133,6 +134,7 @@
         
         .expense-card { padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;}
         .expense-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .expense-icon.deposit { background: rgba(16, 185, 129, 0.2); }
         .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--glass-bg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--glass-border); }
         
         .action-btn { background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
@@ -142,6 +144,7 @@
         .settlement-card { display: flex; flex-direction: column; padding: 16px; margin-bottom: 12px; gap: 12px; }
         .text-green { color: var(--success); } .text-red { color: var(--danger); }
         .text-primary { color: var(--primary); }
+        .text-warning { color: var(--warning); }
         
         .member-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-top: 8px; }
         .member-toggle { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
@@ -203,6 +206,28 @@
             <div class="avatar" style="width: 40px; height: 40px; cursor: pointer;" onclick="app.switchView('members')">👥</div>
         </header>
 
+        <div class="glass p-4 mb-6" style="border: 1px solid var(--warning); background: rgba(245, 158, 11, 0.05);">
+            <div class="flex justify-between align-center mb-4">
+                <h3 class="font-semibold text-sm flex align-center gap-2">💼 Group Wallet (You)</h3>
+                <button class="btn btn-small" style="background: var(--warning); color: #000; font-weight: bold;" onclick="app.openDepositModal()">+ Deposit</button>
+            </div>
+            <div class="flex justify-between text-center">
+                <div>
+                    <p class="text-xs text-muted mb-1">Collected</p>
+                    <h4 class="font-bold text-white" id="wallet-collected">₹0</h4>
+                </div>
+                <div>
+                    <p class="text-xs text-muted mb-1">Spent (By You)</p>
+                    <h4 class="font-bold text-red" id="wallet-spent">₹0</h4>
+                </div>
+                <div>
+                    <p class="text-xs text-muted mb-1">Wallet Left</p>
+                    <h4 class="font-bold text-green" id="wallet-left">₹0</h4>
+                </div>
+            </div>
+            <p class="text-xs mt-3 text-muted text-center">Money deposited to you by others in advance.</p>
+        </div>
+
         <div class="glass p-6 mb-6">
             <div class="text-center">
                 <p class="text-sm text-muted">Total Group Spent</p>
@@ -242,18 +267,18 @@
     </div>
 
     <div id="view-expenses" class="view p-6">
-        <h2 class="mb-6 mt-4">Expense Timeline</h2>
+        <h2 class="mb-6 mt-4">Ledger Timeline</h2>
         <div id="expense-list"></div>
         <div id="expense-empty" class="text-center mt-6" style="display: none;">
             <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;">🧾</div>
-            <p class="text-muted">No expenses added yet.</p>
+            <p class="text-muted">No transactions added yet.</p>
         </div>
     </div>
 
     <div id="view-settlements" class="view p-6">
         <h2 class="mb-6 mt-4">Settle Up 🤝</h2>
         <div class="glass p-4 mb-6">
-            <p class="text-xs text-muted">App automatically calculates the absolute minimum UPI transfers needed to clear all debts.</p>
+            <p class="text-xs text-muted">Automatically calculates minimum transfers, factoring in both your expenses and wallet deposits.</p>
         </div>
         <div id="settlement-list"></div>
     </div>
@@ -274,7 +299,7 @@
             <span class="nav-icon">🏠</span><span>Home</span>
         </a>
         <a class="nav-item" onclick="app.switchView('expenses')">
-            <span class="nav-icon">🧾</span><span>Expenses</span>
+            <span class="nav-icon">🧾</span><span>Timeline</span>
         </a>
         <a class="nav-item" onclick="app.switchView('settlements')">
             <span class="nav-icon">🤝</span><span>Settle</span>
@@ -338,6 +363,37 @@
         <button class="btn btn-primary mt-6" onclick="app.saveExpense()">Save Expense</button>
     </div>
 
+    <div class="bottom-sheet" id="sheet-deposit">
+        <div class="sheet-handle"></div>
+        <h2 class="mb-4 text-center">Add Wallet Deposit</h2>
+        
+        <div class="form-group">
+            <label>Who Deposited to you?</label>
+            <select id="dep-by" class="input" style="appearance: auto; background: var(--bg-dark);"></select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="dep-amount" class="input" placeholder="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+            <label>Payment Method</label>
+            <select id="dep-method" class="input" style="appearance: auto; background: var(--bg-dark); padding: 14px;">
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Optional Note</label>
+            <input type="text" id="dep-note" class="input" placeholder="e.g. Advance for hotel">
+        </div>
+
+        <button class="btn btn-primary mt-6" style="background: var(--wallet-gradient);" onclick="app.saveDeposit()">Add Deposit to Wallet</button>
+    </div>
+
     <div class="bottom-sheet" id="sheet-member">
         <div class="sheet-handle"></div>
         <h2 class="mb-4 text-center" id="member-modal-title">Add Member</h2>
@@ -380,6 +436,7 @@
             trip: null, 
             members: [], 
             expenses: [],
+            deposits: [], // NEW: Wallet Deposits
             payments: [], 
             history: [] 
         },
@@ -391,8 +448,10 @@
             const savedData = localStorage.getItem('tripkhata_master');
             if (savedData) {
                 this.state = JSON.parse(savedData);
+                // Defensive checks for older local storage versions
                 if(!this.state.payments) this.state.payments = [];
                 if(!this.state.history) this.state.history = [];
+                if(!this.state.deposits) this.state.deposits = [];
                 
                 if (this.state.trip) {
                     this.switchView('dashboard');
@@ -457,8 +516,10 @@
                 budget: parseFloat(budget)
             };
 
+            // m1 is always the app creator (The Accountant)
             this.state.members = [{ id: 'm1', name: 'Me', emoji: '😎' }];
             this.state.expenses = [];
+            this.state.deposits = [];
             this.state.payments = [];
 
             this.saveData();
@@ -488,12 +549,14 @@
                 trip: JSON.parse(JSON.stringify(this.state.trip)),
                 members: JSON.parse(JSON.stringify(this.state.members)),
                 expenses: JSON.parse(JSON.stringify(this.state.expenses)),
+                deposits: JSON.parse(JSON.stringify(this.state.deposits)),
                 payments: JSON.parse(JSON.stringify(this.state.payments))
             });
 
             this.state.trip = null;
             this.state.members = [];
             this.state.expenses = [];
+            this.state.deposits = [];
             this.state.payments = [];
 
             this.saveData();
@@ -506,7 +569,6 @@
             this.renderRecentTrips();
         },
 
-        // NEW: Reset / Delete Trip Feature
         resetTrip(btn) {
             if (btn.dataset.confirm !== "true") {
                 btn.dataset.confirm = "true";
@@ -523,6 +585,7 @@
             this.state.trip = null;
             this.state.members = [];
             this.state.expenses = [];
+            this.state.deposits = [];
             this.state.payments = [];
 
             this.saveData();
@@ -544,7 +607,6 @@
             document.querySelectorAll('.bottom-sheet').forEach(el => el.classList.remove('active'));
         },
 
-        // UPDATED: Open Add/Edit Member Modal
         openMemberModal(editId = null) {
             if (editId) {
                 const member = this.state.members.find(m => m.id === editId);
@@ -554,10 +616,8 @@
                 document.getElementById('edit-mem-id').value = member.id;
                 document.getElementById('save-mem-btn').innerText = "Update Member";
                 
-                // Select their current emoji
                 const chip = Array.from(document.querySelectorAll('#emoji-picker .quick-chip')).find(el => el.innerText === member.emoji);
                 if(chip) this.selectEmoji(member.emoji, chip);
-
             } else {
                 document.getElementById('member-modal-title').innerText = "Add Member";
                 document.getElementById('mem-name').value = '';
@@ -580,7 +640,6 @@
             el.style.borderColor = 'var(--primary)';
         },
 
-        // UPDATED: Save or Update Member
         saveMember() {
             const name = document.getElementById('mem-name').value.trim();
             const emoji = document.getElementById('mem-emoji').value;
@@ -590,34 +649,73 @@
 
             if (editId) {
                 const mem = this.state.members.find(m => m.id === editId);
-                if (mem) {
-                    mem.name = name;
-                    mem.emoji = emoji;
-                }
+                if (mem) { mem.name = name; mem.emoji = emoji; }
                 this.showToast('Member updated! ✅');
             } else {
                 this.state.members.push({ id: 'm_' + Date.now(), name, emoji });
                 this.showToast(`${name} added! ✅`);
             }
-
             this.saveData();
             this.closeModals();
         },
 
-        // NEW: Delete Member with Safety Check
         deleteMember(id) {
-            // Safety check: Don't delete if they are part of expenses
             const hasExpenses = this.state.expenses.some(e => 
                 e.paidBy === id || (e.splitAmong && e.splitAmong.includes(id))
             );
+            const hasDeposits = this.state.deposits.some(d => d.by === id);
 
-            if (hasExpenses) {
-                return this.showToast('Cannot delete! This person is part of active expenses.');
+            if (hasExpenses || hasDeposits) {
+                return this.showToast('Cannot delete! This person is part of active expenses or deposits.');
             }
 
             this.state.members = this.state.members.filter(m => m.id !== id);
             this.saveData();
             this.showToast('Member removed 🗑️');
+        },
+
+        // NEW: Deposit Functions
+        openDepositModal() {
+            if (this.state.members.length === 0) return this.showToast('Add members first!');
+            
+            document.getElementById('dep-amount').value = '';
+            document.getElementById('dep-note').value = '';
+            document.getElementById('dep-method').value = 'UPI';
+            
+            // Populate "Who deposited" dropdown (excluding accountant/m1 if you want, but good to include all)
+            document.getElementById('dep-by').innerHTML = this.state.members.map(m => 
+                `<option value="${m.id}">${m.emoji} ${m.name}</option>`
+            ).join('');
+
+            this.openModal('sheet-deposit');
+        },
+
+        saveDeposit() {
+            const byId = document.getElementById('dep-by').value;
+            const amount = parseFloat(document.getElementById('dep-amount').value);
+            const method = document.getElementById('dep-method').value;
+            const note = document.getElementById('dep-note').value.trim();
+
+            if (!amount || amount <= 0) return this.showToast('Enter valid amount');
+
+            this.state.deposits.push({
+                id: 'd_' + Date.now(),
+                by: byId,
+                amount: amount,
+                method: method,
+                note: note,
+                date: new Date().toISOString()
+            });
+
+            this.saveData();
+            this.closeModals();
+            this.showToast('Deposit saved! 💼');
+        },
+
+        deleteDeposit(id) {
+            this.state.deposits = this.state.deposits.filter(d => d.id !== id);
+            this.saveData();
+            this.showToast("Deposit removed 🗑️");
         },
 
         openExpenseModal(title = '', icon = '💸') {
@@ -640,6 +738,9 @@
             document.getElementById('exp-paid-by').innerHTML = this.state.members.map(m => 
                 `<option value="${m.id}">${m.emoji} ${m.name}</option>`
             ).join('');
+
+            // Automatically set paid by "Me" (the accountant) for quicker input if using wallet
+            document.getElementById('exp-paid-by').value = 'm1';
 
             document.getElementById('exp-split-members').innerHTML = this.state.members.map(m => 
                 `<div class="member-toggle selected" data-id="${m.id}" onclick="this.classList.toggle('selected')">
@@ -705,8 +806,7 @@
             const list = document.getElementById('recent-trips-list');
             
             if (!this.state.history || this.state.history.length === 0) {
-                container.style.display = 'none';
-                return;
+                container.style.display = 'none'; return;
             }
             
             container.style.display = 'block';
@@ -731,11 +831,22 @@
             document.getElementById('dash-trip-name').innerText = this.state.trip.name;
             document.getElementById('dash-trip-subtitle').innerText = `${this.state.members.length} Members • Current Trip`;
             
+            // 1. Group Expenses Math
             const sharedExpenses = this.state.expenses.filter(e => e.type !== 'personal');
             const totalSpent = sharedExpenses.reduce((sum, e) => sum + e.amount, 0);
-            
             document.getElementById('dash-total-spent').innerText = `₹${Math.round(totalSpent).toLocaleString('en-IN')}`;
 
+            // 2. Wallet Math (Deposited vs Spent By Accountant 'm1')
+            const totalCollected = this.state.deposits.reduce((sum, d) => sum + d.amount, 0);
+            const spentByAccountant = this.state.expenses.filter(e => e.paidBy === 'm1').reduce((sum, e) => sum + e.amount, 0);
+            const walletLeft = totalCollected - spentByAccountant;
+
+            document.getElementById('wallet-collected').innerText = `₹${Math.round(totalCollected).toLocaleString('en-IN')}`;
+            document.getElementById('wallet-spent').innerText = `₹${Math.round(spentByAccountant).toLocaleString('en-IN')}`;
+            document.getElementById('wallet-left').innerText = `₹${Math.round(walletLeft).toLocaleString('en-IN')}`;
+            document.getElementById('wallet-left').className = walletLeft < 0 ? "font-bold text-red" : "font-bold text-green";
+
+            // 3. Leaderboard
             const paidTotals = {};
             this.state.members.forEach(m => paidTotals[m.id] = 0);
             sharedExpenses.forEach(e => {
@@ -758,6 +869,7 @@
                 `;
             }).join('');
 
+            // 4. Budget Bar
             const budget = this.state.trip.budget;
             const progress = document.getElementById('dash-progress');
             const healthText = document.getElementById('dash-health-text');
@@ -773,11 +885,12 @@
             }
         },
 
+        // UPDATED: Renders BOTH Expenses and Deposits in one timeline
         renderExpenses() {
             const list = document.getElementById('expense-list');
             const empty = document.getElementById('expense-empty');
             
-            if (this.state.expenses.length === 0) {
+            if (this.state.expenses.length === 0 && this.state.deposits.length === 0) {
                 list.innerHTML = ''; empty.style.display = 'block'; return;
             }
             empty.style.display = 'none';
@@ -803,38 +916,59 @@
                 </div>
             `;
 
-            const sorted = [...this.state.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+            // Merge and sort both arrays
+            const allItems = [
+                ...this.state.expenses.map(e => ({ ...e, isDeposit: false })),
+                ...this.state.deposits.map(d => ({ ...d, isDeposit: true }))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date));
 
-            list.innerHTML = summaryHtml + sorted.map(e => {
-                const payer = this.state.members.find(m => m.id === e.paidBy) || {name: 'Unknown'};
-                const date = new Date(e.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short'});
-                const typeTag = e.type === 'personal' ? `<span class="text-xs" style="color: #f59e0b; border: 1px solid #f59e0b; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Personal</span>` : '';
+            list.innerHTML = summaryHtml + allItems.map(item => {
+                const date = new Date(item.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'});
                 
-                let splitText = 'Personal Expense';
-                if (e.type !== 'personal') {
-                    const splitCount = e.splitAmong ? e.splitAmong.length : 1;
-                    const perHead = Math.round(e.amount / splitCount);
-                    splitText = `Split among ${splitCount} <span class="text-primary font-bold">(₹${perHead}/head)</span>`;
-                }
-                
-                return `
-                <div class="glass expense-card">
-                    <div class="flex align-center gap-4">
-                        <div class="expense-icon">${e.icon}</div>
-                        <div>
-                            <h4 class="font-semibold text-sm">${e.title} ${typeTag}</h4>
-                            <p class="text-xs text-muted mt-1">Paid by ${payer.name} • ${date}</p>
-                            <p class="text-xs mt-1" style="color: #cbd5e1;">${splitText}</p>
-                            <button class="action-btn delete mt-2" onclick="app.deleteExpense('${e.id}')">🗑️ Delete</button>
+                if (item.isDeposit) {
+                    const depositor = this.state.members.find(m => m.id === item.by) || {name: 'Unknown'};
+                    const noteTag = item.note ? `<span style="color:#fbbf24;">"${item.note}"</span>` : `via ${item.method}`;
+                    return `
+                    <div class="glass expense-card" style="border-left: 4px solid var(--success);">
+                        <div class="flex align-center gap-4">
+                            <div class="expense-icon deposit">💼</div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-success">Wallet Deposit</h4>
+                                <p class="text-xs text-muted mt-1">From ${depositor.name} • ${date}</p>
+                                <p class="text-xs mt-1">${noteTag}</p>
+                                <button class="action-btn delete mt-2" onclick="app.deleteDeposit('${item.id}')">🗑️ Delete</button>
+                            </div>
                         </div>
+                        <div class="font-bold text-success">+₹${Math.round(item.amount).toLocaleString('en-IN')}</div>
                     </div>
-                    <div class="font-bold text-primary">₹${Math.round(e.amount).toLocaleString('en-IN')}</div>
-                </div>
-                `;
+                    `;
+                } else {
+                    const payer = this.state.members.find(m => m.id === item.paidBy) || {name: 'Unknown'};
+                    const typeTag = item.type === 'personal' ? `<span class="text-xs" style="color: #f59e0b; border: 1px solid #f59e0b; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Personal</span>` : '';
+                    let splitText = 'Personal Expense';
+                    if (item.type !== 'personal') {
+                        const splitCount = item.splitAmong ? item.splitAmong.length : 1;
+                        const perHead = Math.round(item.amount / splitCount);
+                        splitText = `Split among ${splitCount} <span class="text-primary font-bold">(₹${perHead}/head)</span>`;
+                    }
+                    return `
+                    <div class="glass expense-card">
+                        <div class="flex align-center gap-4">
+                            <div class="expense-icon">${item.icon}</div>
+                            <div>
+                                <h4 class="font-semibold text-sm">${item.title} ${typeTag}</h4>
+                                <p class="text-xs text-muted mt-1">Paid by ${payer.name} • ${date}</p>
+                                <p class="text-xs mt-1" style="color: #cbd5e1;">${splitText}</p>
+                                <button class="action-btn delete mt-2" onclick="app.deleteExpense('${item.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        <div class="font-bold text-primary">₹${Math.round(item.amount).toLocaleString('en-IN')}</div>
+                    </div>
+                    `;
+                }
             }).join('');
         },
 
-        // UPDATED: Render Members list with Edit and Delete options
         renderMembers() {
             const list = document.getElementById('members-list');
             const spendMap = {};
@@ -875,14 +1009,15 @@
         renderSettlements() {
             const list = document.getElementById('settlement-list');
             
-            if (this.state.members.length < 2 || this.state.expenses.length === 0) {
-                list.innerHTML = `<div class="text-center text-muted mt-6">Not enough data. Add more members and expenses.</div>`;
+            if (this.state.members.length < 2 || (this.state.expenses.length === 0 && this.state.deposits.length === 0)) {
+                list.innerHTML = `<div class="text-center text-muted mt-6">Not enough data. Add members and expenses/deposits.</div>`;
                 return;
             }
 
             const balances = {};
             this.state.members.forEach(m => balances[m.id] = 0);
 
+            // 1. Process Expenses
             this.state.expenses.forEach(e => {
                 if (e.type !== 'personal') {
                     if(balances[e.paidBy] !== undefined) balances[e.paidBy] += e.amount;
@@ -893,6 +1028,14 @@
                 }
             });
 
+            // 2. Process Wallet Deposits (Crucial Logic update)
+            // If someone gives money to 'm1' (the wallet), they get credit (+), and 'm1' assumes debt (-)
+            this.state.deposits.forEach(d => {
+                if(balances[d.by] !== undefined) balances[d.by] += d.amount;
+                if(balances['m1'] !== undefined) balances['m1'] -= d.amount;
+            });
+
+            // 3. Process completed manual payments
             this.state.payments.forEach(p => {
                 if(balances[p.from] !== undefined) balances[p.from] += p.amount; 
                 if(balances[p.to] !== undefined) balances[p.to] -= p.amount; 
@@ -1001,6 +1144,26 @@
             const printWindow = window.open('', '_blank');
             if (!printWindow) { this.showToast("Please allow popups to download report"); return; }
 
+            // Document Wallet Deposits
+            let depositsHtml = '';
+            if (dataTarget.deposits && dataTarget.deposits.length > 0) {
+                let depositsList = dataTarget.deposits.map(d => {
+                    const member = dataTarget.members.find(m => m.id === d.by) || {name:'Unknown'};
+                    const date = new Date(d.date).toLocaleDateString('en-GB');
+                    return `<tr><td style="padding:10px; border-bottom:1px solid #e2e8f0;">${member.name}</td>
+                            <td style="padding:10px; border-bottom:1px solid #e2e8f0;">${d.method} - ${d.note || ''}</td>
+                            <td style="padding:10px; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:500;">₹${d.amount.toLocaleString('en-IN')}</td></tr>`;
+                }).join('');
+                
+                depositsHtml = `
+                    <h3>Wallet Deposits</h3>
+                    <table>
+                        <thead><tr><th>Depositor</th><th>Method/Note</th><th style="text-align:right;">Amount</th></tr></thead>
+                        <tbody>${depositsList}</tbody>
+                    </table>
+                `;
+            }
+
             let totalSpent = 0;
             let expensesListHtml = dataTarget.expenses.filter(e => e.type !== 'personal').map(e => {
                 totalSpent += e.amount;
@@ -1016,6 +1179,7 @@
 
             const balances = {};
             dataTarget.members.forEach(m => balances[m.id] = 0);
+            
             dataTarget.expenses.forEach(e => {
                 if (e.type !== 'personal') {
                     if(balances[e.paidBy] !== undefined) balances[e.paidBy] += e.amount;
@@ -1025,6 +1189,14 @@
                     }
                 }
             });
+
+            if (dataTarget.deposits) {
+                dataTarget.deposits.forEach(d => {
+                    if(balances[d.by] !== undefined) balances[d.by] += d.amount;
+                    if(balances['m1'] !== undefined) balances['m1'] -= d.amount;
+                });
+            }
+
             dataTarget.payments.forEach(p => {
                 if(balances[p.from] !== undefined) balances[p.from] += p.amount; 
                 if(balances[p.to] !== undefined) balances[p.to] -= p.amount; 
@@ -1054,6 +1226,8 @@
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
                 </div>
                 
+                ${depositsHtml}
+
                 <h3>Trip Expenses Breakdown</h3>
                 <table>
                     <thead><tr><th>Expense Item</th><th style="text-align:right;">Amount</th></tr></thead>
