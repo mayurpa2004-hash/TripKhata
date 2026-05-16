@@ -1,454 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TripKhata - Master Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-radius: 20px;
+        }
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);background:transparent}
-:root{--brand:#1D9E75;--brand-light:#E1F5EE;--brand-dark:#085041;--danger:#E24B4A;--warn:#EF9F27;--safe:#639922}
-.app{max-width:390px;margin:0 auto;background:var(--color-background-tertiary);min-height:700px;border-radius:var(--border-radius-lg);overflow:hidden;border:0.5px solid var(--color-border-tertiary);position:relative}
-.topbar{background:var(--color-background-primary);padding:14px 16px 10px;border-bottom:0.5px solid var(--color-border-tertiary)}
-.trip-badge{display:flex;align-items:center;gap:8px}
-.trip-icon{width:36px;height:36px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;color:#1D9E75;font-size:18px}
-.trip-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
-.trip-code{font-size:11px;color:var(--color-text-secondary);letter-spacing:0.5px}
-.share-btn{margin-left:auto;background:#E1F5EE;color:#1D9E75;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px}
-.content{padding:14px 14px 80px;overflow-y:auto}
-.section-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
-.tab{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-secondary);white-space:nowrap;transition:all 0.15s}
-.tab.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
-.screen{display:none}
-.screen.active{display:block}
-.budget-card{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:12px;border:0.5px solid var(--color-border-tertiary)}
-.budget-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.budget-label{font-size:12px;color:var(--color-text-secondary)}
-.budget-amount{font-size:26px;font-weight:500;color:var(--color-text-primary)}
-.budget-sub{font-size:12px;color:#1D9E75;margin-top:2px}
-.health-dot{width:10px;height:10px;border-radius:50%;background:#639922}
-.health-dot.warn{background:#EF9F27}
-.health-dot.danger{background:#E24B4A}
-.progress-bar{height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;margin-bottom:8px}
-.progress-fill{height:100%;border-radius:3px;background:#1D9E75;transition:width 0.4s}
-.progress-fill.warn{background:#EF9F27}
-.progress-fill.danger{background:#E24B4A}
-.progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.stat-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;border:0.5px solid var(--color-border-tertiary)}
-.stat-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
-.stat-value{font-size:18px;font-weight:500;color:var(--color-text-primary)}
-.stat-value.green{color:#1D9E75}
-.stat-value.red{color:#E24B4A}
-.quick-add{margin-bottom:14px}
-.qa-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;font-weight:500}
-.qa-buttons{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-.qa-btn{flex-shrink:0;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:5px;transition:all 0.15s}
-.qa-btn:hover{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
-.timeline-item{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
-.tl-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
-.tl-info{flex:1}
-.tl-text{font-size:13px;color:var(--color-text-primary)}
-.tl-text strong{color:#1D9E75}
-.tl-time{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
-.tl-amount{font-size:15px;font-weight:500;color:var(--color-text-primary)}
-.member-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary)}
-.member-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.member-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500}
-.member-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
-.member-role{font-size:11px;color:var(--color-text-secondary)}
-.member-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.ms-item{text-align:center}
-.ms-val{font-size:13px;font-weight:500}
-.ms-lab{font-size:10px;color:var(--color-text-secondary)}
-.settlement-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:14px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary)}
-.settle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.settle-from{font-size:13px;color:var(--color-text-primary)}
-.settle-arrow{color:#1D9E75;font-size:14px}
-.settle-to{font-size:13px;color:var(--color-text-primary)}
-.settle-amount{margin-left:auto;font-size:16px;font-weight:500;color:#E24B4A}
-.settle-btn{width:100%;padding:8px;border-radius:8px;border:0.5px solid #1D9E75;background:#E1F5EE;color:#1D9E75;font-size:13px;font-weight:500;cursor:pointer}
-.settle-btn.done{background:#E1F5EE;color:#9FE1CB;border-color:#9FE1CB}
-.fab{position:absolute;bottom:72px;right:16px;width:52px;height:52px;border-radius:50%;background:#1D9E75;border:none;color:#fff;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(29,158,117,0.35);z-index:10;transition:transform 0.15s}
-.fab:hover{transform:scale(1.08)}
-.bottom-nav{position:absolute;bottom:0;left:0;right:0;background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 10px}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;color:var(--color-text-secondary);font-size:10px;transition:color 0.15s;border:none;background:transparent}
-.nav-item.active{color:#1D9E75}
-.nav-item i{font-size:22px}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:20;display:none}
-.modal-overlay.open{display:flex}
-.modal-sheet{background:var(--color-background-primary);border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;animation:slideUp 0.25s ease}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-handle{width:36px;height:4px;background:var(--color-border-secondary);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-size:16px;font-weight:500;margin-bottom:16px}
-.form-group{margin-bottom:12px}
-.form-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;display:block}
-.form-input{width:100%;padding:10px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:14px;color:var(--color-text-primary)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.type-toggle{display:flex;gap:6px;margin-bottom:12px}
-.type-btn{flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:13px;cursor:pointer;color:var(--color-text-secondary);font-weight:500;transition:all 0.15s}
-.type-btn.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
-.payer-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all 0.15s}
-.chip.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
-.save-btn{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;margin-top:4px}
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-.cat-chip{padding:8px 4px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);font-size:11px;text-align:center;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all 0.15s}
-.cat-chip.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
-.leaderboard{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:12px;border:0.5px solid var(--color-border-tertiary)}
-.lb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
-.lb-row:last-child{border-bottom:none}
-.lb-rank{font-size:16px;width:24px}
-.lb-bar-wrap{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
-.lb-bar{height:100%;border-radius:3px;background:#1D9E75}
-.lb-amt{font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:56px;text-align:right}
-.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
-.toast{position:absolute;top:16px;left:16px;right:16px;background:#1D9E75;color:#fff;padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;z-index:30;display:none;align-items:center;gap:8px}
-.toast.show{display:flex}
-</style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
-<h2 class="sr-only">TripKhata — Trip expense manager demo app</h2>
+        body {
+            background: var(--bg-darker);
+            background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-darker) 70%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
 
-<div class="app" id="app">
-  <div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toast-msg">Done!</span></div>
+        #app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+            background: transparent;
+            overflow-x: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
 
-  <div class="topbar">
-    <div class="trip-badge">
-      <div class="trip-icon">🏖</div>
-      <div>
-        <div class="trip-name">Goa Trip 2024</div>
-        <div class="trip-code">tripkhata.com/t/GOA2024</div>
-      </div>
-      <button class="share-btn" onclick="showToast('Link copied!')"><i class="ti ti-share" style="font-size:13px" aria-hidden="true"></i> Share</button>
-    </div>
-  </div>
+        .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); }
 
-  <div class="content" id="content">
-    <div class="section-tabs">
-      <button class="tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
-      <button class="tab" onclick="switchTab('expenses',this)">Expenses</button>
-      <button class="tab" onclick="switchTab('members',this)">Members</button>
-      <button class="tab" onclick="switchTab('settle',this)">Settle Up</button>
-    </div>
+        h1, h2, h3 { color: var(--text-main); }
+        p { color: var(--text-muted); }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .text-center { text-align: center; }
 
-    <div class="screen active" id="screen-dashboard">
-      <div class="budget-card">
-        <div class="budget-header">
-          <div>
-            <div class="budget-label">Total budget</div>
-            <div class="budget-amount">₹20,000</div>
-            <div class="budget-sub">₹5,850 remaining</div>
-          </div>
-          <div class="health-dot warn" title="Near budget"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill warn" style="width:70%"></div></div>
-        <div class="progress-labels"><span>₹14,150 spent</span><span>70%</span></div>
-      </div>
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 480px;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; padding: 12px 10px 24px 10px; z-index: 100;
+        }
 
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">Shared expenses</div>
-          <div class="stat-value green">₹12,400</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Personal expenses</div>
-          <div class="stat-value">₹1,750</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Members</div>
-          <div class="stat-value">4</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Per person avg</div>
-          <div class="stat-value">₹3,100</div>
-        </div>
-      </div>
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-muted); text-decoration: none; font-size: 0.75rem;
+            cursor: pointer; transition: color 0.3s; flex: 1;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.5rem; }
 
-      <div class="quick-add">
-        <div class="qa-label">⚡ Quick add</div>
-        <div class="qa-buttons">
-          <button class="qa-btn" onclick="openModal('Food')">🍽 Food</button>
-          <button class="qa-btn" onclick="openModal('Auto')">🚕 Auto</button>
-          <button class="qa-btn" onclick="openModal('Water')">💧 Water</button>
-          <button class="qa-btn" onclick="openModal('Hotel')">🏨 Hotel</button>
-          <button class="qa-btn" onclick="openModal('Shopping')">🛍 Shopping</button>
-        </div>
-      </div>
+        .fab {
+            position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px;
+            border-radius: 50%; background: var(--gradient-primary); color: white;
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); cursor: pointer; z-index: 99; border: none; transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+        @media (min-width: 481px) { .fab { right: calc(50% - 220px); } }
 
-      <div class="section-title">🏆 Leaderboard</div>
-      <div class="leaderboard">
-        <div class="lb-row">
-          <span class="lb-rank">🥇</span>
-          <div style="width:36px;height:36px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#1D9E75;flex-shrink:0">MP</div>
-          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Mayur</div>
-          <div class="lb-bar-wrap"><div class="lb-bar" style="width:100%"></div></div>
-          <div class="lb-amt">₹5,400</div>
+        .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.8; }
+        .btn-primary { background: var(--gradient-primary); color: white; }
+        .btn-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); }
+        .btn-small { padding: 8px 16px; border-radius: 10px; font-size: 0.875rem; width: auto; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.875rem; color: var(--text-muted); }
+        .input { width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); border-radius: 12px; color: white; font-size: 1rem; outline: none; transition: border-color 0.3s; }
+        .input:focus { border-color: var(--primary); }
+
+        .p-4 { padding: 16px; } .p-6 { padding: 24px; }
+        .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; }
+        .mb-2 { margin-bottom: 8px; } .mb-6 { margin-bottom: 24px; }
+        
+        .flex { display: flex; } .flex-col { display: flex; flex-direction: column; }
+        .justify-between { justify-content: space-between; } .align-center { align-items: center; }
+        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; }
+
+        .view { display: none; animation: fadeIn 0.3s ease; padding-bottom: 100px; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; display: none; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.active { display: block; opacity: 1; }
+        .bottom-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 480px; background: var(--bg-dark); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px; z-index: 201; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); border-top: 1px solid var(--glass-border); max-height: 90vh; overflow-y: auto; }
+        .bottom-sheet.active { transform: translateX(-50%) translateY(0); }
+        .sheet-handle { width: 40px; height: 4px; background: var(--glass-border); border-radius: 4px; margin: 0 auto 20px auto; }
+
+        .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s; }
+
+        .quick-add-scroll { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 12px; scrollbar-width: none; }
+        .quick-add-scroll::-webkit-scrollbar { display: none; }
+        .quick-chip { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: background 0.2s; }
+        .quick-chip:active { background: rgba(255,255,255,0.1); }
+        
+        .expense-card { padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;}
+        .expense-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--glass-bg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--glass-border); }
+        
+        .delete-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px;}
+
+        .settlement-card { display: flex; flex-direction: column; padding: 16px; margin-bottom: 12px; gap: 12px; }
+        .text-green { color: var(--success); } .text-red { color: var(--danger); }
+        
+        .member-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-top: 8px; }
+        .member-toggle { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .member-toggle.selected { background: rgba(99, 102, 241, 0.2); border-color: var(--primary); }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.875rem; z-index: 1000; transition: transform 0.3s; border: 1px solid var(--glass-border); }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+
+    <!-- VIEW: Welcome / Create Trip -->
+    <div id="view-welcome" class="view active p-6">
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🌴</div>
+            <h1 style="font-size: 2rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; color: transparent;">TripKhata</h1>
+            <p class="mt-2 text-sm">Personal Master Ledger</p>
         </div>
-        <div class="lb-row">
-          <span class="lb-rank">🥈</span>
-          <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#534AB7;flex-shrink:0">RK</div>
-          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Rohit</div>
-          <div class="lb-bar-wrap"><div class="lb-bar" style="width:74%;background:#534AB7"></div></div>
-          <div class="lb-amt">₹4,000</div>
+
+        <div class="glass p-6">
+            <h2 class="mb-4 text-center">Start a New Trip</h2>
+            <div class="form-group">
+                <label>Destination / Trip Name</label>
+                <input type="text" id="trip-name" class="input" placeholder="e.g. Shirdi Trip 2026">
+            </div>
+            <div class="form-group">
+                <label>Total Budget (₹) - Optional</label>
+                <input type="number" id="trip-budget" class="input" placeholder="e.g. 50000">
+            </div>
+            <button class="btn btn-primary mt-4" onclick="app.createTrip()">Create Trip</button>
         </div>
-        <div class="lb-row">
-          <span class="lb-rank">🥉</span>
-          <div style="width:36px;height:36px;border-radius:50%;background:#FAECE7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#993C1D;flex-shrink:0">AS</div>
-          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Akash</div>
-          <div class="lb-bar-wrap"><div class="lb-bar" style="width:55%;background:#D85A30"></div></div>
-          <div class="lb-amt">₹2,950</div>
+
+        <!-- Recent Trips Section -->
+        <div id="recent-trips-container" class="mt-8" style="display: none;">
+            <h3 class="mb-4 text-center font-semibold text-muted text-xs uppercase tracking-wider">Recent Trips Archive</h3>
+            <div id="recent-trips-list"></div>
         </div>
-        <div class="lb-row">
-          <span class="lb-rank"> 4</span>
-          <div style="width:36px;height:36px;border-radius:50%;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#854F0B;flex-shrink:0">SG</div>
-          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Sagar</div>
-          <div class="lb-bar-wrap"><div class="lb-bar" style="width:0%;background:#EF9F27"></div></div>
-          <div class="lb-amt">₹0</div>
-        </div>
-      </div>
     </div>
 
-    <div class="screen" id="screen-expenses">
-      <div class="section-title">Recent activity</div>
-      <div id="timeline">
-        <div class="timeline-item">
-          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
-          <div class="tl-info">
-            <div class="tl-text"><strong>Mayur</strong> added Hotel</div>
-            <div class="tl-time">Today 10:30 AM · 🏨 Stay · Split 4 ways</div>
-          </div>
-          <div class="tl-amount">₹4,000</div>
+    <!-- VIEW: Dashboard -->
+    <div id="view-dashboard" class="view p-6">
+        <header class="flex justify-between align-center mb-6 mt-4">
+            <div>
+                <p class="text-xs text-muted" id="dash-trip-subtitle">Current Trip</p>
+                <h1 id="dash-trip-name" class="font-bold">Trip Name</h1>
+            </div>
+            <div class="avatar" style="width: 40px; height: 40px; cursor: pointer;" onclick="app.switchView('members')">👥</div>
+        </header>
+
+        <!-- Budget Card -->
+        <div class="glass p-6 mb-6">
+            <div class="text-center">
+                <p class="text-sm text-muted">Total Group Spent</p>
+                <h2 style="font-size: 2.5rem; margin-top: 8px; font-weight: 800; color: white;" id="dash-total-spent">₹0</h2>
+            </div>
+            <div class="progress-bar mt-6">
+                <div id="dash-progress" class="progress-fill"></div>
+            </div>
+            <p class="text-xs text-muted mt-2 text-center" id="dash-health-text">Start adding expenses!</p>
         </div>
-        <div class="timeline-item">
-          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
-          <div class="tl-info">
-            <div class="tl-text"><strong>Rohit</strong> added Lunch</div>
-            <div class="tl-time">Today 1:15 PM · 🍽 Food · Split 4 ways</div>
-          </div>
-          <div class="tl-amount">₹850</div>
+
+        <!-- Leaderboard -->
+        <div class="glass p-4 mb-6">
+            <h3 class="font-semibold mb-3 text-sm flex align-center gap-2">🏆 Leaderboard (Who Paid Most)</h3>
+            <div id="dash-leaderboard" class="flex flex-col gap-2">
+                <!-- Leaderboard injected via JS -->
+            </div>
         </div>
-        <div class="timeline-item">
-          <div class="tl-avatar" style="background:#FAECE7;color:#993C1D">AS</div>
-          <div class="tl-info">
-            <div class="tl-text"><strong>Akash</strong> added Shopping</div>
-            <div class="tl-time">Today 3:00 PM · 🛍 Personal</div>
-          </div>
-          <div class="tl-amount">₹1,200</div>
+
+        <!-- Quick Add (Tailored for Shirdi/Road Trips) -->
+        <h3 class="font-semibold mb-4">Quick Add Expense</h3>
+        <div class="quick-add-scroll mb-6">
+            <div class="quick-chip" onclick="app.openExpenseModal('Train', '🚆')">🚆 Train</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Hotels', '🏨')">🏨 Hotels</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Wet n Joy', '🎢')">🎢 Wet n Joy</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Nashta', '🥪')">🥪 Nashta</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Lunch / Dinner', '🍽️')">🍽️ Lunch/Dinner</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Auto', '🛺')">🛺 Auto</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Chai', '☕')">☕ Chai</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Water Bottle', '💧')">💧 Water</div>
+            <div class="quick-chip" onclick="app.openExpenseModal('Prasad', '🍬')">🍬 Prasad</div>
         </div>
-        <div class="timeline-item">
-          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
-          <div class="tl-info">
-            <div class="tl-text"><strong>Mayur</strong> added Train Tickets</div>
-            <div class="tl-time">Yesterday · 🚂 Travel · Split 4 ways</div>
-          </div>
-          <div class="tl-amount">₹1,400</div>
+
+        <div class="flex gap-4">
+            <button class="btn btn-outline" style="flex: 1;" onclick="app.generatePDF()">📄 Report</button>
+            <button class="btn btn-outline" style="flex: 1; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" onclick="app.finishTrip(this)">🏁 Finish Trip</button>
         </div>
-        <div class="timeline-item">
-          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
-          <div class="tl-info">
-            <div class="tl-text"><strong>Rohit</strong> added Dinner</div>
-            <div class="tl-time">Yesterday · 🍽 Food · Split 4 ways</div>
-          </div>
-          <div class="tl-amount">₹950</div>
-        </div>
-      </div>
     </div>
 
-    <div class="screen" id="screen-members">
-      <div class="section-title">4 members</div>
-      <div class="member-card">
-        <div class="member-header">
-          <div class="member-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
-          <div><div class="member-name">Mayur Patil</div><div class="member-role">Trip organiser</div></div>
-          <div style="margin-left:auto;font-size:12px;color:#1D9E75;font-weight:500;background:#E1F5EE;padding:4px 10px;border-radius:20px">Gets ₹3,000</div>
+    <!-- VIEW: Expenses Timeline -->
+    <div id="view-expenses" class="view p-6">
+        <h2 class="mb-6 mt-4">Expense Timeline</h2>
+        <div id="expense-list"></div>
+        <div id="expense-empty" class="text-center mt-6" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;">🧾</div>
+            <p class="text-muted">No expenses added yet.</p>
         </div>
-        <div class="member-stats">
-          <div class="ms-item"><div class="ms-val" style="color:#1D9E75">₹5,400</div><div class="ms-lab">Paid</div></div>
-          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
-          <div class="ms-item"><div class="ms-val" style="color:#1D9E75">+₹3,000</div><div class="ms-lab">Balance</div></div>
-        </div>
-      </div>
-      <div class="member-card">
-        <div class="member-header">
-          <div class="member-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
-          <div><div class="member-name">Rohit Kumar</div><div class="member-role">Member</div></div>
-          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹600</div>
-        </div>
-        <div class="member-stats">
-          <div class="ms-item"><div class="ms-val" style="color:#534AB7">₹1,800</div><div class="ms-lab">Paid</div></div>
-          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
-          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹600</div><div class="ms-lab">Balance</div></div>
-        </div>
-      </div>
-      <div class="member-card">
-        <div class="member-header">
-          <div class="member-avatar" style="background:#FAECE7;color:#993C1D">AS</div>
-          <div><div class="member-name">Akash Sharma</div><div class="member-role">Member</div></div>
-          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹1,400</div>
-        </div>
-        <div class="member-stats">
-          <div class="ms-item"><div class="ms-val" style="color:#D85A30">₹1,000</div><div class="ms-lab">Paid</div></div>
-          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
-          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹1,400</div><div class="ms-lab">Balance</div></div>
-        </div>
-      </div>
-      <div class="member-card">
-        <div class="member-header">
-          <div class="member-avatar" style="background:#FAEEDA;color:#854F0B">SG</div>
-          <div><div class="member-name">Sagar Gupta</div><div class="member-role">Member</div></div>
-          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹2,400</div>
-        </div>
-        <div class="member-stats">
-          <div class="ms-item"><div class="ms-val">₹0</div><div class="ms-lab">Paid</div></div>
-          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
-          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹2,400</div><div class="ms-lab">Balance</div></div>
-        </div>
-      </div>
     </div>
 
-    <div class="screen" id="screen-settle">
-      <div class="section-title">Settlements needed</div>
-      <div class="settlement-card" id="s1">
-        <div class="settle-row">
-          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">RK</div>
-          <div class="settle-from">Rohit</div>
-          <div class="settle-arrow">→</div>
-          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
-          <div class="settle-to">Mayur</div>
-          <div class="settle-amount">₹600</div>
+    <!-- VIEW: Settlements -->
+    <div id="view-settlements" class="view p-6">
+        <h2 class="mb-6 mt-4">Settle Up 🤝</h2>
+        <div class="glass p-4 mb-6">
+            <p class="text-xs text-muted">App automatically calculates the absolute minimum UPI transfers needed to clear all debts.</p>
         </div>
-        <button class="settle-btn" onclick="markSettled('s1',this)">Mark as Settled ✓</button>
-      </div>
-      <div class="settlement-card" id="s2">
-        <div class="settle-row">
-          <div class="tl-avatar" style="background:#FAECE7;color:#993C1D;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">AS</div>
-          <div class="settle-from">Akash</div>
-          <div class="settle-arrow">→</div>
-          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
-          <div class="settle-to">Mayur</div>
-          <div class="settle-amount">₹1,400</div>
+        <div id="settlement-list"></div>
+    </div>
+
+    <!-- VIEW: Members -->
+    <div id="view-members" class="view p-6">
+        <div class="flex justify-between align-center mb-6 mt-4">
+            <h2>Trip Members</h2>
+            <button class="btn btn-primary btn-small" onclick="app.openMemberModal()">+ Add</button>
         </div>
-        <button class="settle-btn" onclick="markSettled('s2',this)">Mark as Settled ✓</button>
-      </div>
-      <div class="settlement-card" id="s3">
-        <div class="settle-row">
-          <div class="tl-avatar" style="background:#FAEEDA;color:#854F0B;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">SG</div>
-          <div class="settle-from">Sagar</div>
-          <div class="settle-arrow">→</div>
-          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
-          <div class="settle-to">Mayur</div>
-          <div class="settle-amount">₹2,400</div>
+        <div id="members-list"></div>
+        <div class="glass p-4 mt-6 text-center">
+            <p class="text-sm text-muted mb-3">As the accountant, you add all members here and input their expenses.</p>
         </div>
-        <button class="settle-btn" onclick="markSettled('s3',this)">Mark as Settled ✓</button>
-      </div>
     </div>
-  </div>
 
-  <button class="fab" onclick="openModal('')" aria-label="Add expense">+</button>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="main-nav" style="display: none;">
+        <a class="nav-item active" onclick="app.switchView('dashboard')">
+            <span class="nav-icon">🏠</span><span>Home</span>
+        </a>
+        <a class="nav-item" onclick="app.switchView('expenses')">
+            <span class="nav-icon">🧾</span><span>Expenses</span>
+        </a>
+        <a class="nav-item" onclick="app.switchView('settlements')">
+            <span class="nav-icon">🤝</span><span>Settle</span>
+        </a>
+        <a class="nav-item" onclick="app.switchView('members')">
+            <span class="nav-icon">👥</span><span>Members</span>
+        </a>
+    </nav>
 
-  <nav class="bottom-nav" aria-label="Main navigation">
-    <button class="nav-item active" onclick="switchNav(0,this,'dashboard')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Home</button>
-    <button class="nav-item" onclick="switchNav(1,this,'expenses')"><i class="ti ti-receipt" aria-hidden="true"></i>Expenses</button>
-    <button class="nav-item" onclick="switchNav(2,this,'members')"><i class="ti ti-users" aria-hidden="true"></i>Members</button>
-    <button class="nav-item" onclick="switchNav(3,this,'settle')"><i class="ti ti-arrows-exchange" aria-hidden="true"></i>Settle</button>
-    <button class="nav-item" onclick="showToast('Export PDF feature coming soon!')"><i class="ti ti-download" aria-hidden="true"></i>Export</button>
-  </nav>
-</div>
+    <!-- FAB -->
+    <button class="fab" id="fab-add" style="display: none;" onclick="app.openExpenseModal()">+</button>
 
-<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-title">Add expense</div>
-    <div class="type-toggle">
-      <button class="type-btn active" onclick="setType(this,'shared')">🤝 Shared</button>
-      <button class="type-btn" onclick="setType(this,'personal')">👤 Personal</button>
+    <!-- MODALS & BOTTOM SHEETS -->
+    <div class="modal-overlay" id="modal-overlay" onclick="app.closeModals()"></div>
+
+    <!-- Add Expense Bottom Sheet -->
+    <div class="bottom-sheet" id="sheet-expense">
+        <div class="sheet-handle"></div>
+        <h2 class="mb-4 text-center" id="expense-modal-title">Add Expense</h2>
+        
+        <div class="form-group">
+            <label>What was it for?</label>
+            <input type="text" id="exp-title" class="input" placeholder="e.g. Dinner">
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="exp-amount" class="input" placeholder="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group flex gap-4">
+            <div style="flex:1">
+                <label>Type</label>
+                <select id="exp-type" class="input" style="appearance: auto; background: var(--bg-dark); padding: 14px;" onchange="app.toggleExpenseType()">
+                    <option value="shared">Group Split</option>
+                    <option value="personal">Personal</option>
+                </select>
+            </div>
+            <div style="flex:1">
+                <label>Category</label>
+                <select id="exp-category" class="input" style="appearance: auto; background: var(--bg-dark); padding: 14px;">
+                    <option value="Travel">Travel</option>
+                    <option value="Stay">Stay</option>
+                    <option value="Food">Food</option>
+                    <option value="Activities">Activities</option>
+                    <option value="Misc">Misc</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Who Paid?</label>
+            <select id="exp-paid-by" class="input" style="appearance: auto; background: var(--bg-dark);"></select>
+        </div>
+
+        <div id="split-section" class="form-group mt-4">
+            <label class="flex justify-between">
+                <span>Split Equally Among</span>
+                <span class="text-primary text-xs" onclick="app.selectAllSplit()" style="cursor:pointer; font-weight:bold;">Select All</span>
+            </label>
+            <div class="member-select-grid" id="exp-split-members"></div>
+        </div>
+
+        <button class="btn btn-primary mt-6" onclick="app.saveExpense()">Save Expense</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Expense title</label>
-      <input class="form-input" id="exp-title" placeholder="e.g. Hotel stay, Lunch..." />
+
+    <!-- Add Member Bottom Sheet -->
+    <div class="bottom-sheet" id="sheet-member">
+        <div class="sheet-handle"></div>
+        <h2 class="mb-4 text-center">Add Member</h2>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="mem-name" class="input" placeholder="Enter friend's name">
+        </div>
+        <div class="form-group">
+            <label>Choose Emoji</label>
+            <div class="quick-add-scroll" id="emoji-picker" style="font-size: 1.5rem;"></div>
+            <input type="hidden" id="mem-emoji" value="😎">
+        </div>
+        <button class="btn btn-primary mt-6" onclick="app.saveMember()">Add to Trip</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Amount (₹)</label>
-      <input class="form-input" id="exp-amount" type="number" placeholder="0" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Category</label>
-      <div class="cat-grid" id="cat-grid">
-        <div class="cat-chip active" onclick="selectCat(this)">🍽 Food</div>
-        <div class="cat-chip" onclick="selectCat(this)">🏨 Stay</div>
-        <div class="cat-chip" onclick="selectCat(this)">🚕 Travel</div>
-        <div class="cat-chip" onclick="selectCat(this)">🎡 Activity</div>
-        <div class="cat-chip" onclick="selectCat(this)">🛍 Shopping</div>
-        <div class="cat-chip" onclick="selectCat(this)">⚡ Others</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Who paid?</label>
-      <div class="payer-chips">
-        <div class="chip active" onclick="selectChip(this,'payer')">Mayur</div>
-        <div class="chip" onclick="selectChip(this,'payer')">Rohit</div>
-        <div class="chip" onclick="selectChip(this,'payer')">Akash</div>
-        <div class="chip" onclick="selectChip(this,'payer')">Sagar</div>
-      </div>
-    </div>
-    <div class="form-group" id="split-group">
-      <label class="form-label">Split among</label>
-      <div class="payer-chips">
-        <div class="chip active" onclick="toggleChip(this)">Mayur</div>
-        <div class="chip active" onclick="toggleChip(this)">Rohit</div>
-        <div class="chip active" onclick="toggleChip(this)">Akash</div>
-        <div class="chip active" onclick="toggleChip(this)">Sagar</div>
-      </div>
-    </div>
-    <button class="save-btn" onclick="saveExpense()">Save Expense</button>
-  </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">Message here</div>
+
 </div>
 
 <script>
-function switchTab(id,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('screen-'+id).classList.add('active');
-}
-function switchNav(i,el,id){
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.tab').forEach((t,j)=>{if(j===i)t.classList.add('active');else t.classList.remove('active')});
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  var sc=document.getElementById('screen-'+id);
-  if(sc)sc.classList.add('active');
-}
-function openModal(cat){
-  document.getElementById('modal').classList.add('open');
-  if(cat){document.getElementById('exp-title').value=cat;document.getElementById('modal-title').textContent='Add '+cat;}
-  else{document.getElementById('exp-title').value='';document.getElementById('modal-title').textContent='Add expense';}
-}
-function closeModalOutside(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open');}
-function setType(el,type){
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('split-group').style.display=type==='shared'?'block':'none';
-}
-function selectChip(el,group){document.querySelectorAll('.payer-chips .chip').forEach(c=>{if(c.parentElement===el.parentElement)c.classList.remove('active')});el.classList.add('active');}
-function toggleChip(el){el.classList.toggle('active');}
-function selectCat(el){document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
-function saveExpense(){
-  var title=document.getElementById('exp-title').value||'Expense';
-  var amount=document.getElementById('exp-amount').value||'0';
-  var timeline=document.getElementById('timeline');
-  var item=document.createElement('div');
-  item.className='timeline-item';
-  item.innerHTML='<div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div><div class="tl-info"><div class="tl-text"><strong>Mayur</strong> added '+title+'</div><div class="tl-time">Just now · Split 4 ways</div></div><div class="tl-amount">₹'+parseInt(amount).toLocaleString('en-IN')+'</div>';
-  timeline.insertBefore(item,timeline.firstChild);
-  document.getElementById('modal').classList.remove('open');
-  showToast('₹'+parseInt(amount).toLocaleString('en-IN')+' added!');
-}
-function markSettled(id,btn){
-  btn.textContent='✓ Settled';
-  btn.classList.add('done');
-  btn.disabled=true;
-  showToast('Settlement marked as done!');
-}
-function showToast(msg){
-  var t=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+    const app = {
+        state: {
+            trip: null, 
+            members: [], 
+            expenses: [],
+            payments: [], // New: Tracks completed settlements
+            history: [] // New: Tracks finished trips
+        },
+        
+        emojis: ['😎','🤓','👻','👽','🤠','👸','🦸‍♂️','🧛‍♀️','🧙‍♂️','🥷','🦁','🐼'],
+        currentView: 'welcome',
+
+        init() {
+            const savedData = localStorage.getItem('tripkhata_master');
+            if (savedData) {
+                this.state = JSON.parse(savedData);
+                // Ensure payments array exists for legacy local storage
+                if(!this.state.payments) this.state.payments = [];
+                if(!this.state.history) this.state.history = []; // Ensure history exists
+                
+                if (this.state.trip) {
+                    this.switchView('dashboard');
+                    document.getElementById('main-nav').style.display = 'flex';
+                    document.getElementById('fab-add').style.display = 'flex';
+                    this.updateAllUI();
+                } else {
+                    this.renderRecentTrips();
+                }
+            }
+            this.setupEmojiPicker();
+        },
+
+        saveData() {
+            localStorage.setItem('tripkhata_master', JSON.stringify(this.state));
+            this.updateAllUI();
+        },
+
+        showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        },
+
+        switchView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.querySelector(`.nav-item[onclick="app.switchView('${viewId}')"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            this.currentView = viewId;
+            window.scrollTo(0,0);
+        },
+
+        createTrip() {
+            const name = document.getElementById('trip-name').value.trim();
+            const budget = document.getElementById('trip-budget').value || 0;
+
+            if (!name) return this.showToast('Please enter a trip name');
+
+            this.state.trip = {
+                id: Date.now().toString(),
+                name,
+                budget: parseFloat(budget)
+            };
+
+            // You are added by default
+            this.state.members = [{ id: 'm1', name: 'Mayur', emoji: '😎' }];
+            this.state.expenses = [];
+            this.state.payments = [];
+
+            this.saveData();
+            this.showToast('Trip created successfully!');
+            
+            document.getElementById('main-nav').style.display = 'flex';
+            document.getElementById('fab-add').style.display = 'flex';
+            this.switchView('dashboard');
+        },
+
+        openModal(id) {
+            document.getElementById('modal-overlay').classList.add('active');
+            document.getElementById(id).classList.add('active');
+        },
+        closeModals() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.querySelectorAll('.bottom-sheet').forEach(el => el.classList.remove('active'));
+        },
+
+        openMemberModal() {
+            document.getElementById('mem-name').value = '';
+            this.openModal('sheet-member');
+        },
+
+        setupEmojiPicker() {
+            const container = document.getElementById('emoji-picker');
+            container.innerHTML = this.emojis.map(e => 
+                `<div class="quick-chip" style="padding: 10px;" onclick="app.selectEmoji('${e}', this)">${e}</div>`
+            ).join('');
+            if(container.firstChild) this.selectEmoji(this.emojis[0], container.firstChild);
+        },
+        selectEmoji(emoji, el) {
+            document.getElementById('mem-emoji').value = emoji;
+            document.querySelectorAll('#emoji-picker .quick-chip').forEach(c => c.style.borderColor = 'var(--glass-border)');
+            el.style.borderColor = 'var(--primary)';
+        },
+        saveMember() {
+            const name = document.getElementById('mem-name').value.trim();
+            const emoji = document.getElementById('mem-emoji').value;
+            if (!name) return this.showToast('Enter a name');
+            this.state.members.push({ id: 'm_' + Date.now(), name, emoji });
+            this.saveData();
+            this.closeModals();
+            this.showToast(`${name} added!`);
+        },
+
+        openExpenseModal(title = '', icon = '💸') {
+            if (this.state.members.length === 0) return this.showToast('Add members first!');
+            
+            document.getElementById('expense-modal-title').innerText = title ? `Add ${title}` : 'Add Expense';
+            document.getElementById('exp-title').value = title;
+            document.getElementById('exp-amount').value = '';
+            document.getElementById('exp-type').value = 'shared';
+            
+            const catSelect = document.getElementById('exp-category');
+            if(title.includes('Nashta') || title.includes('Lunch') || title.includes('Chai')) catSelect.value = 'Food';
+            else if(title.includes('Train') || title.includes('Auto')) catSelect.value = 'Travel';
+            else if(title.includes('Hotel')) catSelect.value = 'Stay';
+            else if(title.includes('Wet n Joy') || title.includes('Prasad')) catSelect.value = 'Activities';
+            else catSelect.value = 'Misc';
+
+            this.toggleExpenseType();
+            
+            // Populate Paid By
+            document.getElementById('exp-paid-by').innerHTML = this.state.members.map(m => 
+                `<option value="${m.id}">${m.emoji} ${m.name}</option>`
+            ).join('');
+
+            // Populate Split Among
+            document.getElementById('exp-split-members').innerHTML = this.state.members.map(m => 
+                `<div class="member-toggle selected" data-id="${m.id}" onclick="this.classList.toggle('selected')">
+                    <div style="font-size: 1.5rem">${m.emoji}</div>
+                    <div class="text-xs mt-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.name}</div>
+                </div>`
+            ).join('');
+
+            document.getElementById('sheet-expense').dataset.tempIcon = icon;
+            this.openModal('sheet-expense');
+        },
+
+        toggleExpenseType() {
+            const type = document.getElementById('exp-type').value;
+            document.getElementById('split-section').style.display = type === 'personal' ? 'none' : 'block';
+        },
+        selectAllSplit() {
+            document.querySelectorAll('.member-toggle').forEach(el => el.classList.add('selected'));
+        },
+
+        saveExpense() {
+            const title = document.getElementById('exp-title').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const paidBy = document.getElementById('exp-paid-by').value;
+            const type = document.getElementById('exp-type').value;
+            const category = document.getElementById('exp-category').value;
+            const icon = document.getElementById('sheet-expense').dataset.tempIcon || '💸';
+            
+            const splitNodes = document.querySelectorAll('.member-toggle.selected');
+            const splitAmong = Array.from(splitNodes).map(n => n.dataset.id);
+
+            if (!title || !amount || amount <= 0) return this.showToast('Enter valid title and amount');
+            if (type === 'shared' && splitAmong.length === 0) return this.showToast('Select at least one person to split');
+
+            this.state.expenses.push({
+                id: 'e_' + Date.now(),
+                title, amount, type, category, paidBy,
+                splitAmong: type === 'personal' ? [] : splitAmong,
+                icon, date: new Date().toISOString()
+            });
+
+            this.saveData();
+            this.closeModals();
+            this.showToast('Expense saved!');
+        },
+
+        deleteExpense(id) {
+            // Replaced confirm() because the preview iframe blocks standard popups. 
+            // It now deletes instantly and shows a toast.
+            this.state.expenses = this.state.expenses.filter(e => e.id !== id);
+            this.saveData();
+            this.showToast("Expense deleted ✅");
+        },
+
+        finishTrip(btn) {
+            // Double-tap to confirm without using blocked popups
+            if (btn.dataset.confirm !== "true") {
+                btn.dataset.confirm = "true";
+                const originalText = btn.innerText;
+                btn.innerText = "⚠️ Tap again to confirm";
+                btn.style.background = "rgba(239, 68, 68, 0.2)";
+                
+                setTimeout(() => {
+                    btn.dataset.confirm = "false";
+                    btn.innerText = originalText;
+                    btn.style.background = "transparent";
+                }, 3000);
+                return;
+            }
+
+            // Archive the trip
+            this.state.history.push({
+                trip: JSON.parse(JSON.stringify(this.state.trip)),
+                members: JSON.parse(JSON.stringify(this.state.members)),
+                expenses: JSON.parse(JSON.stringify(this.state.expenses)),
+                payments: JSON.parse(JSON.stringify(this.state.payments))
+            });
+
+            // Clear current trip data
+            this.state.trip = null;
+            this.state.members = [];
+            this.state.expenses = [];
+            this.state.payments = [];
+
+            this.saveData();
+            this.showToast("Trip finished and archived! 🏁");
+            
+            // Hide navigation
+            document.getElementById('main-nav').style.display = 'none';
+            document.getElementById('fab-add').style.display = 'none';
+            
+            // Go home and show recent
+            this.switchView('welcome');
+            this.renderRecentTrips();
+        },
+
+        renderRecentTrips() {
+            const container = document.getElementById('recent-trips-container');
+            const list = document.getElementById('recent-trips-list');
+            
+            if (!this.state.history || this.state.history.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            list.innerHTML = this.state.history.slice().reverse().map((past, index) => {
+                const totalSpent = past.expenses.filter(e => e.type !== 'personal').reduce((sum, e) => sum + e.amount, 0);
+                const originalIndex = this.state.history.length - 1 - index;
+                
+                return `
+                <div class="glass p-4 mb-3 flex justify-between align-center" style="border-left: 4px solid var(--primary);">
+                    <div>
+                        <h4 class="font-bold text-sm text-white">${past.trip.name}</h4>
+                        <p class="text-xs text-muted mt-1">${past.members.length} Members • ₹${Math.round(totalSpent).toLocaleString('en-IN')}</p>
+                    </div>
+                    <button class="btn btn-primary btn-small" onclick="app.generatePDF(${originalIndex})">📄 Report</button>
+                </div>
+                `;
+            }).join('');
+        },
+
+        updateAllUI() {
+            if (!this.state.trip) return;
+            this.renderDashboard();
+            this.renderExpenses();
+            this.renderMembers();
+            this.renderSettlements();
+        },
+
+        renderDashboard() {
+            document.getElementById('dash-trip-name').innerText = this.state.trip.name;
+            document.getElementById('dash-trip-subtitle').innerText = `${this.state.members.length} Members • Current Trip`;
+            
+            const sharedExpenses = this.state.expenses.filter(e => e.type !== 'personal');
+            const totalSpent = sharedExpenses.reduce((sum, e) => sum + e.amount, 0);
+            
+            document.getElementById('dash-total-spent').innerText = `₹${Math.round(totalSpent).toLocaleString('en-IN')}`;
+
+            // Leaderboard Calculations
+            const paidTotals = {};
+            this.state.members.forEach(m => paidTotals[m.id] = 0);
+            sharedExpenses.forEach(e => {
+                if (paidTotals[e.paidBy] !== undefined) paidTotals[e.paidBy] += e.amount;
+            });
+            
+            // Sort members by amount paid (highest first)
+            const sortedMembers = [...this.state.members].sort((a, b) => paidTotals[b.id] - paidTotals[a.id]);
+            
+            document.getElementById('dash-leaderboard').innerHTML = sortedMembers.map((m, index) => {
+                const isTop = index === 0 && paidTotals[m.id] > 0;
+                const styleStr = isTop ? 'background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px;' : '';
+                return `
+                <div class="flex justify-between align-center p-2" style="${styleStr}">
+                    <div class="flex align-center gap-2 text-sm">
+                        <span>${isTop ? '🥇' : '👤'}</span>
+                        <span class="${isTop ? 'font-bold text-primary' : ''}">${m.name}</span>
+                    </div>
+                    <div class="text-sm font-semibold">₹${Math.round(paidTotals[m.id]).toLocaleString('en-IN')}</div>
+                </div>
+                `;
+            }).join('');
+
+            const budget = this.state.trip.budget;
+            
+            const progress = document.getElementById('dash-progress');
+            const healthText = document.getElementById('dash-health-text');
+            
+            if (budget > 0) {
+                const pct = Math.min((totalSpent / budget) * 100, 100);
+                progress.style.width = `${pct}%`;
+                if (pct < 75) { progress.style.background = 'var(--success)'; healthText.innerText = 'Budget looks safe 👍'; healthText.style.color = 'var(--success)'; }
+                else if (pct < 95) { progress.style.background = 'var(--warning)'; healthText.innerText = 'Nearing budget limit ⚠️'; healthText.style.color = 'var(--warning)'; }
+                else { progress.style.background = 'var(--danger)'; healthText.innerText = 'Over budget! 🛑'; healthText.style.color = 'var(--danger)'; }
+            } else {
+                progress.style.width = '0%'; healthText.innerText = 'Track expenses freely 🚀';
+            }
+        },
+
+        renderExpenses() {
+            const list = document.getElementById('expense-list');
+            const empty = document.getElementById('expense-empty');
+            
+            if (this.state.expenses.length === 0) {
+                list.innerHTML = ''; empty.style.display = 'block'; return;
+            }
+            empty.style.display = 'none';
+
+            // Calculate Overall Trip Stats
+            const sharedExpenses = this.state.expenses.filter(e => e.type !== 'personal');
+            const totalGroupSpent = sharedExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const memCount = this.state.members.length;
+            const avgPerHead = memCount > 0 ? Math.round(totalGroupSpent / memCount) : 0;
+
+            // Updated layout to move Avg Per Head to the far right side
+            const summaryHtml = `
+                <div class="glass p-4 mb-6" style="border-radius: 16px; border: 1px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.05);">
+                    <p class="text-xs text-muted uppercase tracking-wider mb-2 font-semibold text-center">Overall Group Stats</p>
+                    <div class="flex justify-between align-center mt-2">
+                        <div style="text-align: left;">
+                            <p class="text-xs text-muted mb-1">Total Spent</p>
+                            <h3 class="text-xl font-bold text-white">₹${totalGroupSpent.toLocaleString('en-IN')}</h3>
+                        </div>
+                        <div style="text-align: right;">
+                            <p class="text-xs text-muted mb-1">Avg Per Head</p>
+                            <h3 class="text-xl font-bold text-primary">₹${avgPerHead.toLocaleString('en-IN')}</h3>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const sorted = [...this.state.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            list.innerHTML = summaryHtml + sorted.map(e => {
+                const payer = this.state.members.find(m => m.id === e.paidBy) || {name: 'Unknown'};
+                const date = new Date(e.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short'});
+                const typeTag = e.type === 'personal' ? `<span class="text-xs" style="color: #f59e0b; border: 1px solid #f59e0b; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Personal</span>` : '';
+                
+                let splitText = 'Personal Expense';
+                if (e.type !== 'personal') {
+                    const splitCount = e.splitAmong ? e.splitAmong.length : 1;
+                    const perHead = Math.round(e.amount / splitCount);
+                    splitText = `Split among ${splitCount} <span class="text-primary font-bold">(₹${perHead}/head)</span>`;
+                }
+                
+                return `
+                <div class="glass expense-card">
+                    <div class="flex align-center gap-4">
+                        <div class="expense-icon">${e.icon}</div>
+                        <div>
+                            <h4 class="font-semibold text-sm">${e.title} ${typeTag}</h4>
+                            <p class="text-xs text-muted mt-1">Paid by ${payer.name} • ${date}</p>
+                            <p class="text-xs mt-1" style="color: #cbd5e1;">${splitText}</p>
+                            <button class="delete-btn" onclick="app.deleteExpense('${e.id}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="font-bold text-primary">₹${Math.round(e.amount).toLocaleString('en-IN')}</div>
+                </div>
+                `;
+            }).join('');
+        },
+
+        renderMembers() {
+            const list = document.getElementById('members-list');
+            const spendMap = {};
+            this.state.members.forEach(m => spendMap[m.id] = 0);
+            this.state.expenses.forEach(e => {
+                if (e.type !== 'personal' && spendMap[e.paidBy] !== undefined) spendMap[e.paidBy] += e.amount;
+            });
+
+            list.innerHTML = this.state.members.map(m => `
+                <div class="glass p-4 mb-4 flex justify-between align-center">
+                    <div class="flex align-center gap-4">
+                        <div class="avatar">${m.emoji}</div>
+                        <div>
+                            <h4 class="font-semibold text-sm">${m.name}</h4>
+                            <p class="text-xs text-muted">Total Paid: ₹${Math.round(spendMap[m.id] || 0).toLocaleString('en-IN')}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        },
+
+        markSettled(fromId, toId, amount) {
+            // Replaced confirm() because the preview iframe blocks standard popups.
+            this.state.payments.push({
+                id: 'p_' + Date.now(),
+                from: fromId,
+                to: toId,
+                amount: amount,
+                date: new Date().toISOString()
+            });
+            this.saveData();
+            this.showToast("Marked as settled! ✅");
+        },
+
+        renderSettlements() {
+            const list = document.getElementById('settlement-list');
+            
+            if (this.state.members.length < 2 || this.state.expenses.length === 0) {
+                list.innerHTML = `<div class="text-center text-muted mt-6">Not enough data. Add more members and expenses.</div>`;
+                return;
+            }
+
+            // 1. Calculate Net Balances
+            const balances = {};
+            this.state.members.forEach(m => balances[m.id] = 0);
+
+            // Process Expenses
+            this.state.expenses.forEach(e => {
+                if (e.type !== 'personal') {
+                    if(balances[e.paidBy] !== undefined) balances[e.paidBy] += e.amount;
+                    if (e.splitAmong && e.splitAmong.length > 0) {
+                        const splitAmount = e.amount / e.splitAmong.length;
+                        e.splitAmong.forEach(id => { if(balances[id] !== undefined) balances[id] -= splitAmount; });
+                    }
+                }
+            });
+
+            // Process Completed Payments (Settlements)
+            this.state.payments.forEach(p => {
+                if(balances[p.from] !== undefined) balances[p.from] += p.amount; // Debtor paid, balance goes up
+                if(balances[p.to] !== undefined) balances[p.to] -= p.amount; // Creditor received, balance goes down
+            });
+
+            // FIX: strictly round all balances to absolute integers to prevent floating decimal bugs (e.g., 0.33 fraction getting stuck)
+            for(let id in balances) {
+                balances[id] = Math.round(balances[id]);
+            }
+
+            let debtors = [], creditors = [];
+            let balancesHtml = '<div class="glass p-4 mb-6"><h3 class="font-semibold mb-4 text-xs text-muted uppercase tracking-wider">Final Net Balances</h3>';
+            
+            for (const [id, bal] of Object.entries(balances)) {
+                const mem = this.state.members.find(m => m.id === id);
+                if (!mem) continue;
+
+                if (bal < 0) {
+                    debtors.push({ id, amount: Math.abs(bal) });
+                    balancesHtml += `<div class="flex justify-between mb-3 pb-3 border-b border-[rgba(255,255,255,0.05)] last:border-0 last:pb-0"><span class="text-sm flex align-center gap-2">${mem.emoji} ${mem.name}</span> <span class="text-red text-sm font-bold">Owes ₹${Math.abs(bal).toLocaleString('en-IN')}</span></div>`;
+                } else if (bal > 0) {
+                    creditors.push({ id, amount: bal });
+                    balancesHtml += `<div class="flex justify-between mb-3 pb-3 border-b border-[rgba(255,255,255,0.05)] last:border-0 last:pb-0"><span class="text-sm flex align-center gap-2">${mem.emoji} ${mem.name}</span> <span class="text-green text-sm font-bold">Gets ₹${bal.toLocaleString('en-IN')}</span></div>`;
+                }
+            }
+            balancesHtml += '</div>';
+
+            // 2. Minimum Transactions Logic
+            debtors.sort((a,b) => b.amount - a.amount);
+            creditors.sort((a,b) => b.amount - a.amount);
+
+            const transactions = [];
+            let i = 0, j = 0;
+
+            while (i < debtors.length && j < creditors.length) {
+                const debtor = debtors[i], creditor = creditors[j];
+                const settleAmount = Math.min(debtor.amount, creditor.amount);
+                
+                if (settleAmount > 0) {
+                    transactions.push({ from: debtor.id, to: creditor.id, amount: settleAmount });
+                }
+
+                debtor.amount -= settleAmount;
+                creditor.amount -= settleAmount;
+                if (debtor.amount <= 0) i++;
+                if (creditor.amount <= 0) j++;
+            }
+
+            // Generate Settlement History
+            let historyHtml = '';
+            if (this.state.payments.length > 0) {
+                historyHtml = '<h3 class="font-semibold mt-6 mb-3 text-xs text-muted uppercase tracking-wider">Settled History</h3>';
+                historyHtml += this.state.payments.slice().reverse().map(p => {
+                    const fromMem = this.state.members.find(m => m.id === p.from);
+                    const toMem = this.state.members.find(m => m.id === p.to);
+                    if(!fromMem || !toMem) return '';
+                    return `
+                    <div class="glass p-3 mb-2 flex justify-between align-center opacity-70">
+                        <div class="text-sm flex align-center gap-2"><span class="text-success" style="font-size: 1.2rem;">✓</span> <span><span class="font-semibold">${fromMem.name}</span> paid <span class="font-semibold">${toMem.name}</span></span></div>
+                        <div class="text-sm font-bold text-success">₹${p.amount.toLocaleString('en-IN')}</div>
+                    </div>
+                    `;
+                }).join('');
+            }
+
+            // 3. Render Results
+            if (transactions.length === 0) {
+                list.innerHTML = balancesHtml + `
+                <div class="glass p-6 text-center mt-6">
+                    <div style="font-size: 3rem; margin-bottom:10px;">🎉</div>
+                    <h3 class="text-green font-bold">All Settled Up!</h3>
+                    <p class="text-sm text-muted mt-2">No one owes anything.</p>
+                </div>` + historyHtml;
+                return;
+            }
+
+            let transfersHtml = '<h3 class="font-semibold mb-3 text-xs text-muted uppercase tracking-wider">Suggested Transfers</h3>';
+            transfersHtml += transactions.map(t => {
+                const fromMem = this.state.members.find(m => m.id === t.from);
+                const toMem = this.state.members.find(m => m.id === t.to);
+                return `
+                <div class="glass settlement-card">
+                    <div class="flex align-center justify-between">
+                        <div class="flex align-center gap-3">
+                            <div class="avatar">${fromMem.emoji}</div>
+                            <div>
+                                <h4 class="font-semibold text-sm">${fromMem.name}</h4>
+                                <p class="text-xs text-muted">pays to ${toMem.name}</p>
+                            </div>
+                        </div>
+                        <div class="text-right font-bold text-primary" style="font-size:1.2rem">₹${t.amount.toLocaleString('en-IN')}</div>
+                    </div>
+                    <button class="btn btn-success btn-small w-full mt-2 flex justify-center align-center gap-2" onclick="app.markSettled('${t.from}', '${t.to}', ${t.amount})">
+                        <span style="font-size: 1.1rem; line-height: 1;">✓</span> Mark Settled
+                    </button>
+                </div>
+                `;
+            }).join('');
+
+            list.innerHTML = balancesHtml + transfersHtml + historyHtml;
+        },
+
+        generatePDF(historyIndex = null) {
+            let dataTarget = this.state;
+            if (historyIndex !== null) {
+                dataTarget = this.state.history[historyIndex];
+            }
+
+            if(!dataTarget || !dataTarget.trip) return;
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) { this.showToast("Please allow popups to download report"); return; }
+
+            // Recalculate basic net balances for the report
+            const balances = {};
+            dataTarget.members.forEach(m => balances[m.id] = 0);
+            dataTarget.expenses.forEach(e => {
+                if (e.type !== 'personal') {
+                    if(balances[e.paidBy] !== undefined) balances[e.paidBy] += e.amount;
+                    if (e.splitAmong) {
+                        const splitAmount = e.amount / e.splitAmong.length;
+                        e.splitAmong.forEach(id => { if(balances[id] !== undefined) balances[id] -= splitAmount; });
+                    }
+                }
+            });
+            dataTarget.payments.forEach(p => {
+                if(balances[p.from] !== undefined) balances[p.from] += p.amount; 
+                if(balances[p.to] !== undefined) balances[p.to] -= p.amount; 
+            });
+
+            let balanceRows = dataTarget.members.map(m => {
+                const bal = Math.round(balances[m.id] * 100) / 100;
+                let status = "Settled"; let color = "#475569";
+                if (bal > 0) { status = `Gets ₹${bal.toLocaleString('en-IN')}`; color = "#10b981"; }
+                if (bal < 0) { status = `Owes ₹${Math.abs(bal).toLocaleString('en-IN')}`; color = "#ef4444"; }
+                return `<tr><td style="padding:10px; border-bottom:1px solid #e2e8f0;">${m.name}</td><td style="padding:10px; border-bottom:1px solid #e2e8f0; color:${color}; font-weight:bold;">${status}</td></tr>`;
+            }).join('');
+
+            const html = `
+                <!DOCTYPE html><html><head><title>${dataTarget.trip.name} Report</title>
+                <style>
+                    body { font-family: sans-serif; padding: 40px; color: #0f172a; line-height: 1.5; }
+                    .header { border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
+                    h1 { margin: 0 0 10px 0; color: #312e81; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left;}
+                    th { background: #f1f5f9; padding: 10px; }
+                </style></head><body>
+                <div class="header">
+                    <h1>🌴 TripKhata Final Report</h1>
+                    <p><strong>Trip:</strong> ${dataTarget.trip.name}</p>
+                    <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
+                </div>
+                <h3>Final Net Balances</h3>
+                <table><thead><tr><th>Member</th><th>Status</th></tr></thead><tbody>${balanceRows}</tbody></table>
+                <p style="margin-top: 40px; text-align:center; font-size: 12px; color: #94a3b8;">Generated by TripKhata App</p>
+                <script>window.onload = function() { window.print(); }<\/script>
+                </body></html>
+            `;
+            printWindow.document.write(html);
+            printWindow.document.close();
+        }
+    };
+
+    // Attach app to global window object to ensure inline HTML click events find it properly
+    window.app = app;
+    window.onload = () => app.init();
 </script>
+
+</body>
+</html>
