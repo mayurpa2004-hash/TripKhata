@@ -56,6 +56,8 @@
         .font-bold { font-weight: 700; }
         .font-semibold { font-weight: 600; }
         .text-center { text-align: center; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-wider { letter-spacing: 0.05em; }
 
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; max-width: 480px;
@@ -94,12 +96,12 @@
         .input:focus { border-color: var(--primary); }
 
         .p-4 { padding: 16px; } .p-6 { padding: 24px; }
-        .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; }
-        .mb-2 { margin-bottom: 8px; } .mb-6 { margin-bottom: 24px; }
+        .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; } .mt-8 { margin-top: 32px; }
+        .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; }
         
         .flex { display: flex; } .flex-col { display: flex; flex-direction: column; }
-        .justify-between { justify-content: space-between; } .align-center { align-items: center; }
-        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; }
+        .justify-between { justify-content: space-between; } .justify-around { justify-content: space-around; } .align-center { align-items: center; }
+        .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; }
 
         .view { display: none; animation: fadeIn 0.3s ease; padding-bottom: 100px; }
         .view.active { display: block; }
@@ -127,6 +129,7 @@
 
         .settlement-card { display: flex; flex-direction: column; padding: 16px; margin-bottom: 12px; gap: 12px; }
         .text-green { color: var(--success); } .text-red { color: var(--danger); }
+        .text-primary { color: var(--primary); }
         
         .member-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-top: 8px; }
         .member-toggle { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
@@ -349,8 +352,8 @@
             trip: null, 
             members: [], 
             expenses: [],
-            payments: [], // New: Tracks completed settlements
-            history: [] // New: Tracks finished trips
+            payments: [], 
+            history: [] 
         },
         
         emojis: ['😎','🤓','👻','👽','🤠','👸','🦸‍♂️','🧛‍♀️','🧙‍♂️','🥷','🦁','🐼'],
@@ -360,9 +363,8 @@
             const savedData = localStorage.getItem('tripkhata_master');
             if (savedData) {
                 this.state = JSON.parse(savedData);
-                // Ensure payments array exists for legacy local storage
                 if(!this.state.payments) this.state.payments = [];
-                if(!this.state.history) this.state.history = []; // Ensure history exists
+                if(!this.state.history) this.state.history = [];
                 
                 if (this.state.trip) {
                     this.switchView('dashboard');
@@ -412,7 +414,6 @@
                 budget: parseFloat(budget)
             };
 
-            // You are added by default
             this.state.members = [{ id: 'm1', name: 'Mayur', emoji: '😎' }];
             this.state.expenses = [];
             this.state.payments = [];
@@ -423,6 +424,43 @@
             document.getElementById('main-nav').style.display = 'flex';
             document.getElementById('fab-add').style.display = 'flex';
             this.switchView('dashboard');
+        },
+
+        finishTrip(btn) {
+            if (btn.dataset.confirm !== "true") {
+                btn.dataset.confirm = "true";
+                const originalText = btn.innerText;
+                btn.innerText = "⚠️ Tap again to confirm";
+                btn.style.background = "rgba(239, 68, 68, 0.2)";
+                
+                setTimeout(() => {
+                    btn.dataset.confirm = "false";
+                    btn.innerText = originalText;
+                    btn.style.background = "transparent";
+                }, 3000);
+                return;
+            }
+
+            this.state.history.push({
+                trip: JSON.parse(JSON.stringify(this.state.trip)),
+                members: JSON.parse(JSON.stringify(this.state.members)),
+                expenses: JSON.parse(JSON.stringify(this.state.expenses)),
+                payments: JSON.parse(JSON.stringify(this.state.payments))
+            });
+
+            this.state.trip = null;
+            this.state.members = [];
+            this.state.expenses = [];
+            this.state.payments = [];
+
+            this.saveData();
+            this.showToast("Trip finished and archived! 🏁");
+            
+            document.getElementById('main-nav').style.display = 'none';
+            document.getElementById('fab-add').style.display = 'none';
+            
+            this.switchView('welcome');
+            this.renderRecentTrips();
         },
 
         openModal(id) {
@@ -478,12 +516,10 @@
 
             this.toggleExpenseType();
             
-            // Populate Paid By
             document.getElementById('exp-paid-by').innerHTML = this.state.members.map(m => 
                 `<option value="${m.id}">${m.emoji} ${m.name}</option>`
             ).join('');
 
-            // Populate Split Among
             document.getElementById('exp-split-members').innerHTML = this.state.members.map(m => 
                 `<div class="member-toggle selected" data-id="${m.id}" onclick="this.classList.toggle('selected')">
                     <div style="font-size: 1.5rem">${m.emoji}</div>
@@ -530,53 +566,17 @@
         },
 
         deleteExpense(id) {
-            // Replaced confirm() because the preview iframe blocks standard popups. 
-            // It now deletes instantly and shows a toast.
             this.state.expenses = this.state.expenses.filter(e => e.id !== id);
             this.saveData();
             this.showToast("Expense deleted ✅");
         },
 
-        finishTrip(btn) {
-            // Double-tap to confirm without using blocked popups
-            if (btn.dataset.confirm !== "true") {
-                btn.dataset.confirm = "true";
-                const originalText = btn.innerText;
-                btn.innerText = "⚠️ Tap again to confirm";
-                btn.style.background = "rgba(239, 68, 68, 0.2)";
-                
-                setTimeout(() => {
-                    btn.dataset.confirm = "false";
-                    btn.innerText = originalText;
-                    btn.style.background = "transparent";
-                }, 3000);
-                return;
-            }
-
-            // Archive the trip
-            this.state.history.push({
-                trip: JSON.parse(JSON.stringify(this.state.trip)),
-                members: JSON.parse(JSON.stringify(this.state.members)),
-                expenses: JSON.parse(JSON.stringify(this.state.expenses)),
-                payments: JSON.parse(JSON.stringify(this.state.payments))
-            });
-
-            // Clear current trip data
-            this.state.trip = null;
-            this.state.members = [];
-            this.state.expenses = [];
-            this.state.payments = [];
-
-            this.saveData();
-            this.showToast("Trip finished and archived! 🏁");
-            
-            // Hide navigation
-            document.getElementById('main-nav').style.display = 'none';
-            document.getElementById('fab-add').style.display = 'none';
-            
-            // Go home and show recent
-            this.switchView('welcome');
-            this.renderRecentTrips();
+        updateAllUI() {
+            if (!this.state.trip) return;
+            this.renderDashboard();
+            this.renderExpenses();
+            this.renderMembers();
+            this.renderSettlements();
         },
 
         renderRecentTrips() {
@@ -606,14 +606,6 @@
             }).join('');
         },
 
-        updateAllUI() {
-            if (!this.state.trip) return;
-            this.renderDashboard();
-            this.renderExpenses();
-            this.renderMembers();
-            this.renderSettlements();
-        },
-
         renderDashboard() {
             document.getElementById('dash-trip-name').innerText = this.state.trip.name;
             document.getElementById('dash-trip-subtitle').innerText = `${this.state.members.length} Members • Current Trip`;
@@ -623,14 +615,12 @@
             
             document.getElementById('dash-total-spent').innerText = `₹${Math.round(totalSpent).toLocaleString('en-IN')}`;
 
-            // Leaderboard Calculations
             const paidTotals = {};
             this.state.members.forEach(m => paidTotals[m.id] = 0);
             sharedExpenses.forEach(e => {
                 if (paidTotals[e.paidBy] !== undefined) paidTotals[e.paidBy] += e.amount;
             });
             
-            // Sort members by amount paid (highest first)
             const sortedMembers = [...this.state.members].sort((a, b) => paidTotals[b.id] - paidTotals[a.id]);
             
             document.getElementById('dash-leaderboard').innerHTML = sortedMembers.map((m, index) => {
@@ -672,13 +662,11 @@
             }
             empty.style.display = 'none';
 
-            // Calculate Overall Trip Stats
             const sharedExpenses = this.state.expenses.filter(e => e.type !== 'personal');
             const totalGroupSpent = sharedExpenses.reduce((sum, e) => sum + e.amount, 0);
             const memCount = this.state.members.length;
             const avgPerHead = memCount > 0 ? Math.round(totalGroupSpent / memCount) : 0;
 
-            // Updated layout to move Avg Per Head to the far right side
             const summaryHtml = `
                 <div class="glass p-4 mb-6" style="border-radius: 16px; border: 1px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.05);">
                     <p class="text-xs text-muted uppercase tracking-wider mb-2 font-semibold text-center">Overall Group Stats</p>
@@ -748,7 +736,6 @@
         },
 
         markSettled(fromId, toId, amount) {
-            // Replaced confirm() because the preview iframe blocks standard popups.
             this.state.payments.push({
                 id: 'p_' + Date.now(),
                 from: fromId,
@@ -768,11 +755,9 @@
                 return;
             }
 
-            // 1. Calculate Net Balances
             const balances = {};
             this.state.members.forEach(m => balances[m.id] = 0);
 
-            // Process Expenses
             this.state.expenses.forEach(e => {
                 if (e.type !== 'personal') {
                     if(balances[e.paidBy] !== undefined) balances[e.paidBy] += e.amount;
@@ -783,13 +768,11 @@
                 }
             });
 
-            // Process Completed Payments (Settlements)
             this.state.payments.forEach(p => {
-                if(balances[p.from] !== undefined) balances[p.from] += p.amount; // Debtor paid, balance goes up
-                if(balances[p.to] !== undefined) balances[p.to] -= p.amount; // Creditor received, balance goes down
+                if(balances[p.from] !== undefined) balances[p.from] += p.amount; 
+                if(balances[p.to] !== undefined) balances[p.to] -= p.amount; 
             });
 
-            // FIX: strictly round all balances to absolute integers to prevent floating decimal bugs (e.g., 0.33 fraction getting stuck)
             for(let id in balances) {
                 balances[id] = Math.round(balances[id]);
             }
@@ -811,7 +794,6 @@
             }
             balancesHtml += '</div>';
 
-            // 2. Minimum Transactions Logic
             debtors.sort((a,b) => b.amount - a.amount);
             creditors.sort((a,b) => b.amount - a.amount);
 
@@ -832,7 +814,6 @@
                 if (creditor.amount <= 0) j++;
             }
 
-            // Generate Settlement History
             let historyHtml = '';
             if (this.state.payments.length > 0) {
                 historyHtml = '<h3 class="font-semibold mt-6 mb-3 text-xs text-muted uppercase tracking-wider">Settled History</h3>';
@@ -849,7 +830,6 @@
                 }).join('');
             }
 
-            // 3. Render Results
             if (transactions.length === 0) {
                 list.innerHTML = balancesHtml + `
                 <div class="glass p-6 text-center mt-6">
@@ -896,7 +876,21 @@
             const printWindow = window.open('', '_blank');
             if (!printWindow) { this.showToast("Please allow popups to download report"); return; }
 
-            // Recalculate basic net balances for the report
+            // 1. Generate Expenses List & Total (NO PAYER NAMES)
+            let totalSpent = 0;
+            let expensesListHtml = dataTarget.expenses.filter(e => e.type !== 'personal').map(e => {
+                totalSpent += e.amount;
+                return `<tr>
+                    <td style="padding:10px; border-bottom:1px solid #e2e8f0;">${e.title}</td>
+                    <td style="padding:10px; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:500;">₹${e.amount.toLocaleString('en-IN')}</td>
+                </tr>`;
+            }).join('');
+
+            if(dataTarget.expenses.length === 0) {
+                expensesListHtml = `<tr><td colspan="2" style="padding:10px; text-align:center; color:#94a3b8;">No expenses recorded yet.</td></tr>`;
+            }
+
+            // 2. Recalculate basic net balances for the report
             const balances = {};
             dataTarget.members.forEach(m => balances[m.id] = 0);
             dataTarget.expenses.forEach(e => {
@@ -914,30 +908,49 @@
             });
 
             let balanceRows = dataTarget.members.map(m => {
-                const bal = Math.round(balances[m.id] * 100) / 100;
+                const bal = Math.round(balances[m.id]);
                 let status = "Settled"; let color = "#475569";
                 if (bal > 0) { status = `Gets ₹${bal.toLocaleString('en-IN')}`; color = "#10b981"; }
                 if (bal < 0) { status = `Owes ₹${Math.abs(bal).toLocaleString('en-IN')}`; color = "#ef4444"; }
-                return `<tr><td style="padding:10px; border-bottom:1px solid #e2e8f0;">${m.name}</td><td style="padding:10px; border-bottom:1px solid #e2e8f0; color:${color}; font-weight:bold;">${status}</td></tr>`;
+                return `<tr><td style="padding:10px; border-bottom:1px solid #e2e8f0;">${m.name}</td><td style="padding:10px; border-bottom:1px solid #e2e8f0; text-align:right; color:${color}; font-weight:bold;">${status}</td></tr>`;
             }).join('');
 
+            // 3. Build HTML Document
             const html = `
                 <!DOCTYPE html><html><head><title>${dataTarget.trip.name} Report</title>
                 <style>
-                    body { font-family: sans-serif; padding: 40px; color: #0f172a; line-height: 1.5; }
+                    body { font-family: sans-serif; padding: 40px; color: #0f172a; line-height: 1.5; max-width: 800px; margin: 0 auto; }
                     .header { border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
                     h1 { margin: 0 0 10px 0; color: #312e81; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left;}
-                    th { background: #f1f5f9; padding: 10px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; margin-bottom: 40px; }
+                    th { background: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; }
+                    .total-row td { font-weight: bold; font-size: 1.1em; background: #e0e7ff; color: #312e81; border-top: 2px solid #818cf8; border-bottom: none !important; }
                 </style></head><body>
                 <div class="header">
                     <h1>🌴 TripKhata Final Report</h1>
                     <p><strong>Trip:</strong> ${dataTarget.trip.name}</p>
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
                 </div>
+                
+                <h3>Trip Expenses Breakdown</h3>
+                <table>
+                    <thead><tr><th>Expense Item</th><th style="text-align:right;">Amount</th></tr></thead>
+                    <tbody>
+                        ${expensesListHtml}
+                        <tr class="total-row">
+                            <td style="padding:12px 10px;">Grand Total</td>
+                            <td style="padding:12px 10px; text-align:right;">₹${Math.round(totalSpent).toLocaleString('en-IN')}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <h3>Final Net Balances</h3>
-                <table><thead><tr><th>Member</th><th>Status</th></tr></thead><tbody>${balanceRows}</tbody></table>
-                <p style="margin-top: 40px; text-align:center; font-size: 12px; color: #94a3b8;">Generated by TripKhata App</p>
+                <table>
+                    <thead><tr><th>Member</th><th style="text-align:right;">Status</th></tr></thead>
+                    <tbody>${balanceRows}</tbody>
+                </table>
+                
+                <p style="margin-top: 50px; text-align:center; font-size: 12px; color: #94a3b8;">Generated by TripKhata App</p>
                 <script>window.onload = function() { window.print(); }<\/script>
                 </body></html>
             `;
