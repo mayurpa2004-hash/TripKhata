@@ -13,8 +13,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
     
-    <!-- Embedded Full manifest.json for Native Installation -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVHJpcEtoYXRhIiwic2hvcnRfbmFtZSI6IlRyaXBLaGF0YSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDIwNjE3IiwidGhlbWVfY29sb3ciOiIjMGYxNzJhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMmF5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0F4TURBZ01UQXdJam84ZEdWNGRDQjVQU0l1T1dWdElpQm1iMjUwTFhOcGVtVTlJanB3SWo3d240eTBQQzkwWlhoMFAqd3ZjM1puUGc9PSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
+    <!-- Fixed Manifest Connection -->
+    <link rel="manifest" href="manifest.json">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -150,7 +150,6 @@
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.875rem; z-index: 1000; transition: transform 0.3s; border: 1px solid var(--glass-border); }
         .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* PWA Install Banner Style */
         .install-banner {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.4));
             border: 1px solid var(--success);
@@ -183,7 +182,7 @@
             <button class="btn btn-primary mt-4" onclick="app.createTrip()">Create Trip</button>
         </div>
 
-        <!-- NEW: Native App Install Banner (Hidden by default until Chrome triggers it) -->
+        <!-- PWA Install Banner -->
         <div id="install-banner" class="glass install-banner p-4 mt-6 text-center" style="display: none;">
             <div style="font-size: 2rem; margin-bottom: 8px;">📲</div>
             <h3 class="text-white font-bold mb-1">Install TripKhata App</h3>
@@ -223,9 +222,7 @@
         <!-- Leaderboard -->
         <div class="glass p-4 mb-6">
             <h3 class="font-semibold mb-3 text-sm flex align-center gap-2">🏆 Leaderboard (Who Paid Most)</h3>
-            <div id="dash-leaderboard" class="flex flex-col gap-2">
-                <!-- Leaderboard injected via JS -->
-            </div>
+            <div id="dash-leaderboard" class="flex flex-col gap-2"></div>
         </div>
 
         <!-- Quick Add -->
@@ -374,14 +371,19 @@
 </div>
 
 <script>
-    // PWA Native Install Logic (Listens for Chrome's Install Trigger)
+    // CRITICAL: SERVICE WORKER REGISTRATION FOR TRUE PWA INSTALL
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('ServiceWorker registered successfully!'))
+                .catch(err => console.log('ServiceWorker registration failed: ', err));
+        });
+    }
+
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent Chrome 67 and earlier from automatically showing the prompt
         e.preventDefault();
-        // Stash the event so it can be triggered later.
         deferredPrompt = e;
-        // Show our beautiful "Install Now" banner
         const installBanner = document.getElementById('install-banner');
         if(installBanner) installBanner.style.display = 'block';
     });
@@ -417,7 +419,6 @@
             this.setupEmojiPicker();
         },
 
-        // Trigger the Native Chrome Install Prompt
         installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -429,7 +430,7 @@
                     deferredPrompt = null;
                 });
             } else {
-                this.showToast('Already installed or browser not supported.');
+                this.showToast('Open in phone Chrome menu to click Install App manually.');
             }
         },
 
@@ -693,7 +694,6 @@
             }).join('');
 
             const budget = this.state.trip.budget;
-            
             const progress = document.getElementById('dash-progress');
             const healthText = document.getElementById('dash-health-text');
             
@@ -931,7 +931,6 @@
             const printWindow = window.open('', '_blank');
             if (!printWindow) { this.showToast("Please allow popups to download report"); return; }
 
-            // 1. Generate Expenses List & Total (NO PAYER NAMES)
             let totalSpent = 0;
             let expensesListHtml = dataTarget.expenses.filter(e => e.type !== 'personal').map(e => {
                 totalSpent += e.amount;
@@ -945,7 +944,6 @@
                 expensesListHtml = `<tr><td colspan="2" style="padding:10px; text-align:center; color:#94a3b8;">No expenses recorded yet.</td></tr>`;
             }
 
-            // 2. Recalculate basic net balances for the report
             const balances = {};
             dataTarget.members.forEach(m => balances[m.id] = 0);
             dataTarget.expenses.forEach(e => {
@@ -970,7 +968,6 @@
                 return `<tr><td style="padding:10px; border-bottom:1px solid #e2e8f0;">${m.name}</td><td style="padding:10px; border-bottom:1px solid #e2e8f0; text-align:right; color:${color}; font-weight:bold;">${status}</td></tr>`;
             }).join('');
 
-            // 3. Build HTML Document
             const html = `
                 <!DOCTYPE html><html><head><title>${dataTarget.trip.name} Report</title>
                 <style>
@@ -1014,7 +1011,6 @@
         }
     };
 
-    // Attach app to global window object to ensure inline HTML click events find it properly
     window.app = app;
     window.onload = () => app.init();
 </script>
