@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TripKhata - Master Ledger</title>
+    
+    <!-- PWA Configuration & Coconut Tree Logo 🌴 -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y0PC90ZXh0Pjwvc3ZnPg==">
+    
+    <!-- Embedded Full manifest.json for Native Installation -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVHJpcEtoYXRhIiwic2hvcnRfbmFtZSI6IlRyaXBLaGF0YSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMDIwNjE3IiwidGhlbWVfY29sb3ciOiIjMGYxNzJhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMmF5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0F4TURBZ01UQXdJam84ZEdWNGRDQjVQU0l1T1dWdElpQm1iMjUwTFhOcGVtVTlJanB3SWo3d240eTBQQzkwWlhoMFAqd3ZjM1puUGc9PSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -137,6 +149,13 @@
         
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.875rem; z-index: 1000; transition: transform 0.3s; border: 1px solid var(--glass-border); }
         .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* PWA Install Banner Style */
+        .install-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.4));
+            border: 1px solid var(--success);
+            animation: fadeIn 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +181,14 @@
                 <input type="number" id="trip-budget" class="input" placeholder="e.g. 50000">
             </div>
             <button class="btn btn-primary mt-4" onclick="app.createTrip()">Create Trip</button>
+        </div>
+
+        <!-- NEW: Native App Install Banner (Hidden by default until Chrome triggers it) -->
+        <div id="install-banner" class="glass install-banner p-4 mt-6 text-center" style="display: none;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">📲</div>
+            <h3 class="text-white font-bold mb-1">Install TripKhata App</h3>
+            <p class="text-xs text-muted mb-4" style="color: #a7f3d0;">Install natively for fast, offline access!</p>
+            <button class="btn btn-success" style="background: var(--success); color: white;" onclick="app.installApp()">⬇️ Install Now</button>
         </div>
 
         <!-- Recent Trips Section -->
@@ -201,7 +228,7 @@
             </div>
         </div>
 
-        <!-- Quick Add (Tailored for Shirdi/Road Trips) -->
+        <!-- Quick Add -->
         <h3 class="font-semibold mb-4">Quick Add Expense</h3>
         <div class="quick-add-scroll mb-6">
             <div class="quick-chip" onclick="app.openExpenseModal('Train', '🚆')">🚆 Train</div>
@@ -347,6 +374,18 @@
 </div>
 
 <script>
+    // PWA Native Install Logic (Listens for Chrome's Install Trigger)
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Show our beautiful "Install Now" banner
+        const installBanner = document.getElementById('install-banner');
+        if(installBanner) installBanner.style.display = 'block';
+    });
+
     const app = {
         state: {
             trip: null, 
@@ -376,6 +415,22 @@
                 }
             }
             this.setupEmojiPicker();
+        },
+
+        // Trigger the Native Chrome Install Prompt
+        installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        this.showToast('App installed successfully! 🎉');
+                        document.getElementById('install-banner').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                this.showToast('Already installed or browser not supported.');
+            }
         },
 
         saveData() {
