@@ -1,0 +1,454 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent}
+:root{--brand:#1D9E75;--brand-light:#E1F5EE;--brand-dark:#085041;--danger:#E24B4A;--warn:#EF9F27;--safe:#639922}
+.app{max-width:390px;margin:0 auto;background:var(--color-background-tertiary);min-height:700px;border-radius:var(--border-radius-lg);overflow:hidden;border:0.5px solid var(--color-border-tertiary);position:relative}
+.topbar{background:var(--color-background-primary);padding:14px 16px 10px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.trip-badge{display:flex;align-items:center;gap:8px}
+.trip-icon{width:36px;height:36px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;color:#1D9E75;font-size:18px}
+.trip-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.trip-code{font-size:11px;color:var(--color-text-secondary);letter-spacing:0.5px}
+.share-btn{margin-left:auto;background:#E1F5EE;color:#1D9E75;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px}
+.content{padding:14px 14px 80px;overflow-y:auto}
+.section-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.tab{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-secondary);white-space:nowrap;transition:all 0.15s}
+.tab.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.screen{display:none}
+.screen.active{display:block}
+.budget-card{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:12px;border:0.5px solid var(--color-border-tertiary)}
+.budget-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.budget-label{font-size:12px;color:var(--color-text-secondary)}
+.budget-amount{font-size:26px;font-weight:500;color:var(--color-text-primary)}
+.budget-sub{font-size:12px;color:#1D9E75;margin-top:2px}
+.health-dot{width:10px;height:10px;border-radius:50%;background:#639922}
+.health-dot.warn{background:#EF9F27}
+.health-dot.danger{background:#E24B4A}
+.progress-bar{height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;border-radius:3px;background:#1D9E75;transition:width 0.4s}
+.progress-fill.warn{background:#EF9F27}
+.progress-fill.danger{background:#E24B4A}
+.progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;border:0.5px solid var(--color-border-tertiary)}
+.stat-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.stat-value{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.stat-value.green{color:#1D9E75}
+.stat-value.red{color:#E24B4A}
+.quick-add{margin-bottom:14px}
+.qa-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;font-weight:500}
+.qa-buttons{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.qa-btn{flex-shrink:0;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:5px;transition:all 0.15s}
+.qa-btn:hover{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
+.timeline-item{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
+.tl-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.tl-info{flex:1}
+.tl-text{font-size:13px;color:var(--color-text-primary)}
+.tl-text strong{color:#1D9E75}
+.tl-time{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.tl-amount{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.member-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary)}
+.member-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.member-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500}
+.member-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.member-role{font-size:11px;color:var(--color-text-secondary)}
+.member-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.ms-item{text-align:center}
+.ms-val{font-size:13px;font-weight:500}
+.ms-lab{font-size:10px;color:var(--color-text-secondary)}
+.settlement-card{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:14px;margin-bottom:8px;border:0.5px solid var(--color-border-tertiary)}
+.settle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.settle-from{font-size:13px;color:var(--color-text-primary)}
+.settle-arrow{color:#1D9E75;font-size:14px}
+.settle-to{font-size:13px;color:var(--color-text-primary)}
+.settle-amount{margin-left:auto;font-size:16px;font-weight:500;color:#E24B4A}
+.settle-btn{width:100%;padding:8px;border-radius:8px;border:0.5px solid #1D9E75;background:#E1F5EE;color:#1D9E75;font-size:13px;font-weight:500;cursor:pointer}
+.settle-btn.done{background:#E1F5EE;color:#9FE1CB;border-color:#9FE1CB}
+.fab{position:absolute;bottom:72px;right:16px;width:52px;height:52px;border-radius:50%;background:#1D9E75;border:none;color:#fff;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(29,158,117,0.35);z-index:10;transition:transform 0.15s}
+.fab:hover{transform:scale(1.08)}
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 10px}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;color:var(--color-text-secondary);font-size:10px;transition:color 0.15s;border:none;background:transparent}
+.nav-item.active{color:#1D9E75}
+.nav-item i{font-size:22px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:20;display:none}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--color-background-primary);border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--color-border-secondary);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:10px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:14px;color:var(--color-text-primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type-toggle{display:flex;gap:6px;margin-bottom:12px}
+.type-btn{flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:13px;cursor:pointer;color:var(--color-text-secondary);font-weight:500;transition:all 0.15s}
+.type-btn.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
+.payer-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all 0.15s}
+.chip.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
+.save-btn{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;margin-top:4px}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.cat-chip{padding:8px 4px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);font-size:11px;text-align:center;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all 0.15s}
+.cat-chip.active{background:#E1F5EE;border-color:#1D9E75;color:#1D9E75}
+.leaderboard{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:12px;border:0.5px solid var(--color-border-tertiary)}
+.lb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-size:16px;width:24px}
+.lb-bar-wrap{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.lb-bar{height:100%;border-radius:3px;background:#1D9E75}
+.lb-amt{font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:56px;text-align:right}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.toast{position:absolute;top:16px;left:16px;right:16px;background:#1D9E75;color:#fff;padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;z-index:30;display:none;align-items:center;gap:8px}
+.toast.show{display:flex}
+</style>
+
+<h2 class="sr-only">TripKhata — Trip expense manager demo app</h2>
+
+<div class="app" id="app">
+  <div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toast-msg">Done!</span></div>
+
+  <div class="topbar">
+    <div class="trip-badge">
+      <div class="trip-icon">🏖</div>
+      <div>
+        <div class="trip-name">Goa Trip 2024</div>
+        <div class="trip-code">tripkhata.com/t/GOA2024</div>
+      </div>
+      <button class="share-btn" onclick="showToast('Link copied!')"><i class="ti ti-share" style="font-size:13px" aria-hidden="true"></i> Share</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="section-tabs">
+      <button class="tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
+      <button class="tab" onclick="switchTab('expenses',this)">Expenses</button>
+      <button class="tab" onclick="switchTab('members',this)">Members</button>
+      <button class="tab" onclick="switchTab('settle',this)">Settle Up</button>
+    </div>
+
+    <div class="screen active" id="screen-dashboard">
+      <div class="budget-card">
+        <div class="budget-header">
+          <div>
+            <div class="budget-label">Total budget</div>
+            <div class="budget-amount">₹20,000</div>
+            <div class="budget-sub">₹5,850 remaining</div>
+          </div>
+          <div class="health-dot warn" title="Near budget"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill warn" style="width:70%"></div></div>
+        <div class="progress-labels"><span>₹14,150 spent</span><span>70%</span></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Shared expenses</div>
+          <div class="stat-value green">₹12,400</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Personal expenses</div>
+          <div class="stat-value">₹1,750</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Members</div>
+          <div class="stat-value">4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Per person avg</div>
+          <div class="stat-value">₹3,100</div>
+        </div>
+      </div>
+
+      <div class="quick-add">
+        <div class="qa-label">⚡ Quick add</div>
+        <div class="qa-buttons">
+          <button class="qa-btn" onclick="openModal('Food')">🍽 Food</button>
+          <button class="qa-btn" onclick="openModal('Auto')">🚕 Auto</button>
+          <button class="qa-btn" onclick="openModal('Water')">💧 Water</button>
+          <button class="qa-btn" onclick="openModal('Hotel')">🏨 Hotel</button>
+          <button class="qa-btn" onclick="openModal('Shopping')">🛍 Shopping</button>
+        </div>
+      </div>
+
+      <div class="section-title">🏆 Leaderboard</div>
+      <div class="leaderboard">
+        <div class="lb-row">
+          <span class="lb-rank">🥇</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#1D9E75;flex-shrink:0">MP</div>
+          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Mayur</div>
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:100%"></div></div>
+          <div class="lb-amt">₹5,400</div>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">🥈</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#534AB7;flex-shrink:0">RK</div>
+          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Rohit</div>
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:74%;background:#534AB7"></div></div>
+          <div class="lb-amt">₹4,000</div>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">🥉</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:#FAECE7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#993C1D;flex-shrink:0">AS</div>
+          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Akash</div>
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:55%;background:#D85A30"></div></div>
+          <div class="lb-amt">₹2,950</div>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank"> 4</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#854F0B;flex-shrink:0">SG</div>
+          <div style="flex:1;font-size:13px;color:var(--color-text-primary)">Sagar</div>
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:0%;background:#EF9F27"></div></div>
+          <div class="lb-amt">₹0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-expenses">
+      <div class="section-title">Recent activity</div>
+      <div id="timeline">
+        <div class="timeline-item">
+          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
+          <div class="tl-info">
+            <div class="tl-text"><strong>Mayur</strong> added Hotel</div>
+            <div class="tl-time">Today 10:30 AM · 🏨 Stay · Split 4 ways</div>
+          </div>
+          <div class="tl-amount">₹4,000</div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
+          <div class="tl-info">
+            <div class="tl-text"><strong>Rohit</strong> added Lunch</div>
+            <div class="tl-time">Today 1:15 PM · 🍽 Food · Split 4 ways</div>
+          </div>
+          <div class="tl-amount">₹850</div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-avatar" style="background:#FAECE7;color:#993C1D">AS</div>
+          <div class="tl-info">
+            <div class="tl-text"><strong>Akash</strong> added Shopping</div>
+            <div class="tl-time">Today 3:00 PM · 🛍 Personal</div>
+          </div>
+          <div class="tl-amount">₹1,200</div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
+          <div class="tl-info">
+            <div class="tl-text"><strong>Mayur</strong> added Train Tickets</div>
+            <div class="tl-time">Yesterday · 🚂 Travel · Split 4 ways</div>
+          </div>
+          <div class="tl-amount">₹1,400</div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
+          <div class="tl-info">
+            <div class="tl-text"><strong>Rohit</strong> added Dinner</div>
+            <div class="tl-time">Yesterday · 🍽 Food · Split 4 ways</div>
+          </div>
+          <div class="tl-amount">₹950</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-members">
+      <div class="section-title">4 members</div>
+      <div class="member-card">
+        <div class="member-header">
+          <div class="member-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div>
+          <div><div class="member-name">Mayur Patil</div><div class="member-role">Trip organiser</div></div>
+          <div style="margin-left:auto;font-size:12px;color:#1D9E75;font-weight:500;background:#E1F5EE;padding:4px 10px;border-radius:20px">Gets ₹3,000</div>
+        </div>
+        <div class="member-stats">
+          <div class="ms-item"><div class="ms-val" style="color:#1D9E75">₹5,400</div><div class="ms-lab">Paid</div></div>
+          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
+          <div class="ms-item"><div class="ms-val" style="color:#1D9E75">+₹3,000</div><div class="ms-lab">Balance</div></div>
+        </div>
+      </div>
+      <div class="member-card">
+        <div class="member-header">
+          <div class="member-avatar" style="background:#EEEDFE;color:#534AB7">RK</div>
+          <div><div class="member-name">Rohit Kumar</div><div class="member-role">Member</div></div>
+          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹600</div>
+        </div>
+        <div class="member-stats">
+          <div class="ms-item"><div class="ms-val" style="color:#534AB7">₹1,800</div><div class="ms-lab">Paid</div></div>
+          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
+          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹600</div><div class="ms-lab">Balance</div></div>
+        </div>
+      </div>
+      <div class="member-card">
+        <div class="member-header">
+          <div class="member-avatar" style="background:#FAECE7;color:#993C1D">AS</div>
+          <div><div class="member-name">Akash Sharma</div><div class="member-role">Member</div></div>
+          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹1,400</div>
+        </div>
+        <div class="member-stats">
+          <div class="ms-item"><div class="ms-val" style="color:#D85A30">₹1,000</div><div class="ms-lab">Paid</div></div>
+          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
+          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹1,400</div><div class="ms-lab">Balance</div></div>
+        </div>
+      </div>
+      <div class="member-card">
+        <div class="member-header">
+          <div class="member-avatar" style="background:#FAEEDA;color:#854F0B">SG</div>
+          <div><div class="member-name">Sagar Gupta</div><div class="member-role">Member</div></div>
+          <div style="margin-left:auto;font-size:12px;color:#E24B4A;font-weight:500;background:#FCEBEB;padding:4px 10px;border-radius:20px">Owes ₹2,400</div>
+        </div>
+        <div class="member-stats">
+          <div class="ms-item"><div class="ms-val">₹0</div><div class="ms-lab">Paid</div></div>
+          <div class="ms-item"><div class="ms-val">₹2,400</div><div class="ms-lab">Share</div></div>
+          <div class="ms-item"><div class="ms-val" style="color:#E24B4A">-₹2,400</div><div class="ms-lab">Balance</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-settle">
+      <div class="section-title">Settlements needed</div>
+      <div class="settlement-card" id="s1">
+        <div class="settle-row">
+          <div class="tl-avatar" style="background:#EEEDFE;color:#534AB7;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">RK</div>
+          <div class="settle-from">Rohit</div>
+          <div class="settle-arrow">→</div>
+          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
+          <div class="settle-to">Mayur</div>
+          <div class="settle-amount">₹600</div>
+        </div>
+        <button class="settle-btn" onclick="markSettled('s1',this)">Mark as Settled ✓</button>
+      </div>
+      <div class="settlement-card" id="s2">
+        <div class="settle-row">
+          <div class="tl-avatar" style="background:#FAECE7;color:#993C1D;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">AS</div>
+          <div class="settle-from">Akash</div>
+          <div class="settle-arrow">→</div>
+          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
+          <div class="settle-to">Mayur</div>
+          <div class="settle-amount">₹1,400</div>
+        </div>
+        <button class="settle-btn" onclick="markSettled('s2',this)">Mark as Settled ✓</button>
+      </div>
+      <div class="settlement-card" id="s3">
+        <div class="settle-row">
+          <div class="tl-avatar" style="background:#FAEEDA;color:#854F0B;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">SG</div>
+          <div class="settle-from">Sagar</div>
+          <div class="settle-arrow">→</div>
+          <div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0">MP</div>
+          <div class="settle-to">Mayur</div>
+          <div class="settle-amount">₹2,400</div>
+        </div>
+        <button class="settle-btn" onclick="markSettled('s3',this)">Mark as Settled ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" onclick="openModal('')" aria-label="Add expense">+</button>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-item active" onclick="switchNav(0,this,'dashboard')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Home</button>
+    <button class="nav-item" onclick="switchNav(1,this,'expenses')"><i class="ti ti-receipt" aria-hidden="true"></i>Expenses</button>
+    <button class="nav-item" onclick="switchNav(2,this,'members')"><i class="ti ti-users" aria-hidden="true"></i>Members</button>
+    <button class="nav-item" onclick="switchNav(3,this,'settle')"><i class="ti ti-arrows-exchange" aria-hidden="true"></i>Settle</button>
+    <button class="nav-item" onclick="showToast('Export PDF feature coming soon!')"><i class="ti ti-download" aria-hidden="true"></i>Export</button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Add expense</div>
+    <div class="type-toggle">
+      <button class="type-btn active" onclick="setType(this,'shared')">🤝 Shared</button>
+      <button class="type-btn" onclick="setType(this,'personal')">👤 Personal</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Expense title</label>
+      <input class="form-input" id="exp-title" placeholder="e.g. Hotel stay, Lunch..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Amount (₹)</label>
+      <input class="form-input" id="exp-amount" type="number" placeholder="0" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="cat-grid" id="cat-grid">
+        <div class="cat-chip active" onclick="selectCat(this)">🍽 Food</div>
+        <div class="cat-chip" onclick="selectCat(this)">🏨 Stay</div>
+        <div class="cat-chip" onclick="selectCat(this)">🚕 Travel</div>
+        <div class="cat-chip" onclick="selectCat(this)">🎡 Activity</div>
+        <div class="cat-chip" onclick="selectCat(this)">🛍 Shopping</div>
+        <div class="cat-chip" onclick="selectCat(this)">⚡ Others</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Who paid?</label>
+      <div class="payer-chips">
+        <div class="chip active" onclick="selectChip(this,'payer')">Mayur</div>
+        <div class="chip" onclick="selectChip(this,'payer')">Rohit</div>
+        <div class="chip" onclick="selectChip(this,'payer')">Akash</div>
+        <div class="chip" onclick="selectChip(this,'payer')">Sagar</div>
+      </div>
+    </div>
+    <div class="form-group" id="split-group">
+      <label class="form-label">Split among</label>
+      <div class="payer-chips">
+        <div class="chip active" onclick="toggleChip(this)">Mayur</div>
+        <div class="chip active" onclick="toggleChip(this)">Rohit</div>
+        <div class="chip active" onclick="toggleChip(this)">Akash</div>
+        <div class="chip active" onclick="toggleChip(this)">Sagar</div>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveExpense()">Save Expense</button>
+  </div>
+</div>
+
+<script>
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function switchNav(i,el,id){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,j)=>{if(j===i)t.classList.add('active');else t.classList.remove('active')});
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  var sc=document.getElementById('screen-'+id);
+  if(sc)sc.classList.add('active');
+}
+function openModal(cat){
+  document.getElementById('modal').classList.add('open');
+  if(cat){document.getElementById('exp-title').value=cat;document.getElementById('modal-title').textContent='Add '+cat;}
+  else{document.getElementById('exp-title').value='';document.getElementById('modal-title').textContent='Add expense';}
+}
+function closeModalOutside(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open');}
+function setType(el,type){
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('split-group').style.display=type==='shared'?'block':'none';
+}
+function selectChip(el,group){document.querySelectorAll('.payer-chips .chip').forEach(c=>{if(c.parentElement===el.parentElement)c.classList.remove('active')});el.classList.add('active');}
+function toggleChip(el){el.classList.toggle('active');}
+function selectCat(el){document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+function saveExpense(){
+  var title=document.getElementById('exp-title').value||'Expense';
+  var amount=document.getElementById('exp-amount').value||'0';
+  var timeline=document.getElementById('timeline');
+  var item=document.createElement('div');
+  item.className='timeline-item';
+  item.innerHTML='<div class="tl-avatar" style="background:#E1F5EE;color:#1D9E75">MP</div><div class="tl-info"><div class="tl-text"><strong>Mayur</strong> added '+title+'</div><div class="tl-time">Just now · Split 4 ways</div></div><div class="tl-amount">₹'+parseInt(amount).toLocaleString('en-IN')+'</div>';
+  timeline.insertBefore(item,timeline.firstChild);
+  document.getElementById('modal').classList.remove('open');
+  showToast('₹'+parseInt(amount).toLocaleString('en-IN')+' added!');
+}
+function markSettled(id,btn){
+  btn.textContent='✓ Settled';
+  btn.classList.add('done');
+  btn.disabled=true;
+  showToast('Settlement marked as done!');
+}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
