@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.mayurpa2004_hash.twa",
+      "sha256_cert_fingerprints": [
+        "D9:A8:EE:BC:37:19:2D:AA:20:F5:F5:B8:60:46:B6:91:75:6A:7C:95:A7:76:E2:FC:EE:08:3F:B9:EB:3F:6A:8B:B5"
+      ]
+    }
+  }
+]
