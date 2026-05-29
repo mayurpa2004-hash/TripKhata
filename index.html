@@ -392,14 +392,13 @@
             </details>
 
             <div id="quick-add-container">
-                <h3 class="font-semibold mb-4">Quick Add Expense</h3>
+                <div class="flex justify-between align-center mb-4">
+                    <h3 class="font-semibold">Quick Add Expense</h3>
+                    <button style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--primary); background: rgba(99, 102, 241, 0.1); color: var(--primary); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onclick="app.openManageQuickAdd()">+</button>
+                </div>
                 <!-- Feature 1: Quick Add Expense Chips -->
-                <div class="quick-add-scroll mb-6">
-                    <div class="quick-chip" onclick="app.openExpenseModal(null, 'Chai', '☕', 'Food')">☕ Chai</div>
-                    <div class="quick-chip" onclick="app.openExpenseModal(null, 'Water', '🚰', 'Food')">🚰 Water</div>
-                    <div class="quick-chip" onclick="app.openExpenseModal(null, 'Toll', '🛣️', 'Travel')">🛣️ Toll</div>
-                    <div class="quick-chip" onclick="app.openExpenseModal(null, 'Fuel', '⛽', 'Travel')">⛽ Fuel</div>
-                    <div class="quick-chip" onclick="app.openExpenseModal(null, 'Food', '🍽️', 'Food')">🍽️ Food</div>
+                <div class="quick-add-scroll mb-6" id="dash-quick-adds">
+                    <!-- Dynamic chips will be rendered here -->
                 </div>
             </div>
 
@@ -582,6 +581,39 @@
             <button class="btn btn-outline mt-6" onclick="app.closeModals()">Close</button>
         </div>
 
+        <!-- Manage Quick Adds Modal -->
+        <div class="bottom-sheet" id="sheet-manage-quick">
+            <div class="sheet-handle"></div>
+            <h2 class="mb-4 text-center">Manage Shortcuts</h2>
+            
+            <div class="glass p-3 mb-6" style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(99,102,241,0.2); background: rgba(0,0,0,0.2);">
+                <div id="manage-quick-list" class="flex flex-col gap-2"></div>
+            </div>
+
+            <h3 class="font-semibold text-sm mb-3">Create New Shortcut</h3>
+            <div class="form-group flex gap-3">
+                <div style="width: 80px;">
+                    <label>Emoji</label>
+                    <input type="text" id="qa-icon" class="input text-center" placeholder="🚕" maxlength="2">
+                </div>
+                <div style="flex: 1;">
+                    <label>Title</label>
+                    <input type="text" id="qa-title" class="input" placeholder="e.g. Taxi">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Default Category</label>
+                <select id="qa-category" class="input" style="appearance: auto; background: var(--bg-dark); padding: 14px;">
+                    <option value="Travel">Travel</option>
+                    <option value="Stay">Stay</option>
+                    <option value="Food">Food</option>
+                    <option value="Activities">Activities</option>
+                    <option value="Misc">Misc</option>
+                </select>
+            </div>
+            <button class="btn btn-primary mt-4" onclick="app.saveQuickAdd()">+ Add Shortcut</button>
+        </div>
+
         <div class="toast" id="toast">Message here</div>
 
     </div>
@@ -612,7 +644,14 @@
                 expenses: [],
                 deposits: [],
                 payments: [],
-                history: []
+                history: [],
+                quickExpenses: [
+                    { id: 'q1', title: 'Chai', icon: '☕', category: 'Food' },
+                    { id: 'q2', title: 'Water', icon: '🚰', category: 'Food' },
+                    { id: 'q3', title: 'Toll', icon: '🛣️', category: 'Travel' },
+                    { id: 'q4', title: 'Fuel', icon: '⛽', category: 'Travel' },
+                    { id: 'q5', title: 'Food', icon: '🍽️', category: 'Food' }
+                ]
             },
             
             // Core Engineering: Pure helper functions
@@ -709,6 +748,16 @@
                 oldData.schemaVersion = 2;
                 if(oldData.trip && oldData.trip.isLocked === undefined) oldData.trip.isLocked = false;
                 
+                if (!oldData.quickExpenses) {
+                    oldData.quickExpenses = [
+                        { id: 'q1', title: 'Chai', icon: '☕', category: 'Food' },
+                        { id: 'q2', title: 'Water', icon: '🚰', category: 'Food' },
+                        { id: 'q3', title: 'Toll', icon: '🛣️', category: 'Travel' },
+                        { id: 'q4', title: 'Fuel', icon: '⛽', category: 'Travel' },
+                        { id: 'q5', title: 'Food', icon: '🍽️', category: 'Food' }
+                    ];
+                }
+
                 // Fallback support for old localStorage data mapping paidBy to contributions
                 if (oldData.expenses) {
                     oldData.expenses.forEach(exp => {
@@ -1161,9 +1210,65 @@
                 document.getElementById('btn-add-member').style.display = locked ? 'none' : 'block';
 
                 this.renderDashboard();
+                this.renderQuickAdds();
                 this.renderExpenses();
                 this.renderMembers();
                 this.renderSettlements();
+            },
+
+            renderQuickAdds() {
+                const container = document.getElementById('dash-quick-adds');
+                if (!container) return;
+                container.innerHTML = this.state.quickExpenses.map(q => `
+                    <div class="quick-chip" onclick="app.openExpenseModal(null, '${q.title}', '${q.icon}', '${q.category}')">${q.icon} ${q.title}</div>
+                `).join('');
+            },
+
+            openManageQuickAdd() {
+                if (this.state.trip && this.state.trip.isLocked) return this.showToast("Trip is locked! 🔒");
+                this.renderManageQuickList();
+                document.getElementById('qa-title').value = '';
+                document.getElementById('qa-icon').value = '';
+                document.getElementById('qa-category').value = 'Misc';
+                this.openModal('sheet-manage-quick');
+            },
+
+            renderManageQuickList() {
+                const list = document.getElementById('manage-quick-list');
+                list.innerHTML = this.state.quickExpenses.map(q => `
+                    <div class="flex justify-between align-center p-2" style="border-bottom: 1px solid var(--glass-border);">
+                        <div class="flex align-center gap-2"><span style="font-size:1.2rem">${q.icon}</span> <span class="text-sm">${q.title} <span class="text-xs text-muted">(${q.category})</span></span></div>
+                        <button class="action-btn delete" style="padding: 4px 8px; background: transparent;" onclick="app.deleteQuickAdd('${q.id}')">❌</button>
+                    </div>
+                `).join('') || '<div class="text-xs text-muted text-center py-2">No shortcuts found. Add one below!</div>';
+            },
+
+            saveQuickAdd() {
+                const title = document.getElementById('qa-title').value.trim();
+                const icon = document.getElementById('qa-icon').value.trim() || '💸';
+                const category = document.getElementById('qa-category').value;
+
+                if (!title) return this.showToast('Please enter a title');
+
+                this.state.quickExpenses.push({
+                    id: 'q_' + Date.now(),
+                    title, icon, category
+                });
+
+                this.saveData();
+                this.renderManageQuickList();
+                this.renderQuickAdds();
+                
+                document.getElementById('qa-title').value = '';
+                document.getElementById('qa-icon').value = '';
+                this.showToast('Shortcut added! ✅');
+            },
+
+            deleteQuickAdd(id) {
+                this.state.quickExpenses = this.state.quickExpenses.filter(q => q.id !== id);
+                this.saveData();
+                this.renderManageQuickList();
+                this.renderQuickAdds();
             },
 
             renderRecentTrips() {
@@ -1369,7 +1474,6 @@
                     </div>
                     ${locked ? '' : `
                     <div class="flex gap-2">
-                        <button class="action-btn" onclick="app.openMemberModal('${m.id}')">✏️</button>
                         <button class="action-btn delete" onclick="app.deleteMember('${m.id}')">🗑️</button>
                     </div>`}
                 </div>
