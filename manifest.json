@@ -1,24 +1,30 @@
 {
-  "name": "TripKhata",
-  "short_name": "TripKhata",
-  "start_url": "/tripkhata/",
-  "scope": "/tripkhata/",
+  "name": "RunTrack",
+  "short_name": "RunTrack",
+  "description": "GPS Running Tracker",
+  "start_url": "/RunTrack/",
+  "scope": "/RunTrack/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
-  "description": "Personal Master Ledger for group trips",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
